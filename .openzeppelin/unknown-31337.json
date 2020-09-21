@@ -1,0 +1,28 @@
+{
+  "manifestVersion": "3.1",
+  "impls": {
+    "9c713952f47c3b392b693ceb2f490ec32053b4494f5e3e309a30c4b2a8dffe6f": {
+      "address": "0x7c2C195CD6D34B8F845992d380aADB2730bB9C6F",
+      "txHash": "0xcc404e28701ba9eed975abfcd2acadfd34d0af8666c6b38c87607aa41a7ab7a5",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Greeter",
+            "label": "greeting",
+            "type": "t_string_storage",
+            "src": "contracts/Greeter.sol:7"
+          }
+        ],
+        "types": {
+          "t_string_storage": {
+            "label": "string"
+          }
+        }
+      }
+    }
+  },
+  "admin": {
+    "address": "0x8858eeB3DfffA017D4BCE9801D340D36Cf895CCf",
+    "txHash": "0xb8662a877fa5b5ebf4b0558f5a3c9c50ac4d4d561d86c00ec53667197413ad53"
+  }
+}

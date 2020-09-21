@@ -1,0 +1,38 @@
+{
+    "name": "elekton-contracts",
+    "version": "0.1.0",
+    "description": "Elekton Solidity smart contracts.",
+    "main": "index.js",
+    "scripts": {
+        "start": "buidler node",
+        "compile": "buidler compile",
+        "deploy": "buidler deploy --contract Greeter",
+        "clean": "buidler clean",
+        "test": "buidler test"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/elekton/contracts.git"
+    },
+    "author": {
+        "name": "Omar Desogus",
+        "email": "me@cedoor.dev",
+        "url": "https://cedoor.dev"
+    },
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/elekton/contracts/issues"
+    },
+    "homepage": "https://github.com/elekton/contracts#readme",
+    "devDependencies": {
+        "@nomiclabs/buidler": "^1.4.7",
+        "@nomiclabs/buidler-ethers": "^2.0.0",
+        "@nomiclabs/buidler-waffle": "^2.1.0",
+        "@openzeppelin/buidler-upgrades": "^1.1.0",
+        "@openzeppelin/cli": "^2.8.2",
+        "chai": "^4.2.0",
+        "ethereum-waffle": "^3.1.0",
+        "ethers": "^5.0.14",
+        "prettier": "2.1.2"
+    }
+}
