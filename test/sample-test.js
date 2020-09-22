@@ -1,12 +1,14 @@
 const { expect } = require("chai")
-const { ethers, upgrades } = require("@nomiclabs/buidler")
+const { bytes32ToString, stringToBytes32, deploy } = require("../scripts/utils")
 
-describe("Greeter", function () {
-	it("Should return the new greeting once it's changed", async function () {
-		const Greeter = await ethers.getContractFactory("Greeter")
-		const greeter = await upgrades.deployProxy(Greeter)
+describe("Elekton", function () {
+	it("Should return the user data once an admin is created", async function () {
+		const elekton = await deploy("Elekton")
 
-		await greeter.setGreeting("Hola, mundo!")
-		expect(await greeter.greet()).to.equal("Hola, mundo!")
+		await elekton.createAdmin(...bytes32ToString(["Pinco", "Pallino", "pallino"]))
+
+		const userData = await elekton.getUser()
+
+		expect(stringToBytes32(userData.name)).to.equal("Pinco")
 	})
 })

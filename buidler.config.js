@@ -1,6 +1,6 @@
 usePlugin("@nomiclabs/buidler-waffle")
 usePlugin("@nomiclabs/buidler-ethers")
-usePlugin("@openzeppelin/buidler-upgrades")
+usePlugin("@nomiclabs/buidler-solhint")
 
 const { task, types } = require("@nomiclabs/buidler/config")
 
@@ -16,21 +16,23 @@ task("accounts", "Prints the list of accounts", async () => {
 
 task("deploy", "Deploy a contract instance with Open Zeppelin")
 	.addParam("contract", "The name of the contract", undefined, types.string)
-	.setAction(async ({ contract }) => {
+	.addOptionalParam("quiet", "To quiet output messages", false, types.boolean)
+	.setAction(async ({ contract, quiet }) => {
 		const ContractFactory = await ethers.getContractFactory(contract)
-		const instance = await upgrades.deployProxy(ContractFactory)
+		const instance = await ContractFactory.deploy()
 
 		await instance.deployed()
 
-		console.log(`Contract ${contract} deployed!`)
+		if (!quiet) {
+			console.log(`Contract ${contract} deployed to: ${instance.address}`)
+		}
+
+		return instance
 	})
 
 // https://buidler.dev/config/
 module.exports = {
 	solc: {
 		version: "0.6.8",
-	},
-	paths: {
-		artifacts: "./build/contracts",
 	},
 }
