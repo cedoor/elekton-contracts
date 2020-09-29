@@ -1,7 +1,7 @@
 node_modules
 
 # Buidler files
-artifacts
+build
 cache
 
 .idea
