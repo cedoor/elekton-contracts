@@ -1,6 +1,19 @@
 const { ethers, run } = require("@nomiclabs/buidler")
-const { PublicKey, PrivateKey, Jub } = require("babyjubjub")
+const { PublicKey, PrivateKey } = require("babyjubjub")
 const circomlib = require("circomlib")
+const jsSHA = require("jssha")
+
+function sha256(value) {
+	if (typeof value !== "string") {
+		value = value.toString("hex")
+	}
+
+	const sha256 = new jsSHA("SHA-256", "HEX")
+
+	sha256.update(value)
+
+	return sha256.getHash("HEX")
+}
 
 function createAccount() {
 	const sk = PrivateKey.getRandObj().field
@@ -8,8 +21,8 @@ function createAccount() {
 	const publicKey = PublicKey.fromPrivate(privateKey)
 
 	return {
-		privateKey: privateKey.s.n.toFixed(),
-		publicKey: [publicKey.p.x.n.toFixed(), publicKey.p.y.n.toFixed()]
+		privateKey: decimalToHex(privateKey.s.n.toFixed()),
+		publicKey: getPublicKeyHex(publicKey.p.x.n.toFixed(), publicKey.p.y.n.toFixed())
 	}
 }
 
@@ -22,7 +35,7 @@ function decimalToHex(decimal) {
 }
 
 function hexToDecimal(hex) {
-	return ethers.BigNumber.from(`0x${hex}`).toString()
+	return ethers.BigNumber.from(hex).toString()
 }
 
 async function getAccountAddresses() {
@@ -35,6 +48,17 @@ function getAccounts() {
 
 function deployContract(contractName) {
 	return run("deploy", { contract: contractName, quiet: true })
+}
+
+function getSnarkHash(hash) {
+	const snarkHash = []
+
+	for (let i = 0; i < 8; i++) {
+		const j = i * 8
+		snarkHash.push(`0x${hash.substring(j, j + 8)}`)
+	}
+
+	return snarkHash
 }
 
 function stringToBytes32(s) {
@@ -62,6 +86,7 @@ function bytes32ToString(s) {
 }
 
 module.exports = {
+	sha256,
 	getAccounts,
 	getAccountAddresses,
 	deployContract,
@@ -69,6 +94,6 @@ module.exports = {
 	stringToBytes32,
 	hexToDecimal,
 	decimalToHex,
-	getPublicKeyHex,
-	createAccount
+	createAccount,
+	getSnarkHash
 }
