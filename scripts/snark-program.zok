@@ -44,7 +44,21 @@ def getPublicKey(private field privateKey) -> field[2]:
     return publicKey
 
 
+def toLittleEndian(bool[256] bigEndian) -> bool[256]:
+    bool[256] littleEndian = [false; 256]
+
+    for field i in 0..32 do
+        for field j in 0..8 do
+            field z = i * 8
+
+            littleEndian[z + j] = bigEndian[(248 - z) + j]
+        endfor
+    endfor
+
+    return littleEndian
+
+
 def main(private field privateKey) -> u32[8]:
     field[2] publicKey = getPublicKey(privateKey)
 
-    return boolToU32(compress(publicKey))
+    return boolToU32(toLittleEndian(compress(publicKey)))
