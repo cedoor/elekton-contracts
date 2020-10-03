@@ -1,41 +1,58 @@
+const { config } = require(`${__dirname}/../package.json`)
 const { ethers, run } = require("@nomiclabs/buidler")
-const { PublicKey, PrivateKey } = require("babyjubjub")
-const circomlib = require("circomlib")
-const jsSHA = require("jssha")
+const { eddsa } = require("circomlib")
+const snarkjs = require("snarkjs")
+const { Scalar, utils } = require("ffjavascript")
+const createBlakeHash = require("blake-hash")
+const crypto = require("crypto")
 
-function sha256(value) {
-	if (typeof value !== "string") {
-		value = value.toString("hex")
-	}
-
-	const sha256 = new jsSHA("SHA-256", "HEX")
-
-	sha256.update(value)
-
-	return sha256.getHash("HEX")
+function getProjectConfig() {
+	return config
 }
 
 function createAccount() {
-	const sk = PrivateKey.getRandObj().field
-	const privateKey = new PrivateKey(sk)
-	const publicKey = PublicKey.fromPrivate(privateKey)
+	const rawpvk = crypto.randomBytes(32).toString("hex")
+	const pvk = eddsa.pruneBuffer(createBlakeHash("blake512").update(rawpvk).digest().slice(0, 32))
+	const privateKey = Scalar.shr(utils.leBuff2int(pvk), 3)
+	const publicKey = eddsa.prv2pub(rawpvk)
 
-	return {
-		privateKey: decimalToHex(privateKey.s.n.toFixed()),
-		publicKey: getPublicKeyHex(publicKey.p.x.n.toFixed(), publicKey.p.y.n.toFixed())
-	}
+	return { privateKey, publicKey }
 }
 
-function getPublicKeyHex(x, y) {
-	return circomlib.babyJub.packPoint([BigInt(x), BigInt(y)]).toString("hex")
+async function createProof(input) {
+	const { proof, publicSignals } = await snarkjs.groth16.fullProve(
+		input,
+		`${config.paths.build.snark}/main.wasm`,
+		`${config.paths.build.snark}/circuit_final.zkey`
+	)
+
+	return [
+		[padNumberAs64Hex(proof.pi_a[0]), padNumberAs64Hex(proof.pi_a[1])],
+		[
+			[padNumberAs64Hex(proof.pi_b[0][1]), padNumberAs64Hex(proof.pi_b[0][0])],
+			[padNumberAs64Hex(proof.pi_b[1][1]), padNumberAs64Hex(proof.pi_b[1][0])]
+		],
+		[padNumberAs64Hex(proof.pi_c[0]), padNumberAs64Hex(proof.pi_c[1])],
+		publicSignals.map((n) => padNumberAs64Hex(n))
+	]
+}
+
+function padNumberAs64Hex(n) {
+	let hex = decimalToHex(n)
+
+	while (hex.length < 64) {
+		hex = "0" + hex
+	}
+
+	return `0x${hex}`
 }
 
 function decimalToHex(decimal) {
-	return ethers.BigNumber.from(decimal).toHexString()
+	return ethers.BigNumber.from(decimal).toHexString().substring(2)
 }
 
 function hexToDecimal(hex) {
-	return ethers.BigNumber.from(hex).toString()
+	return ethers.BigNumber.from(`0x${hex}`).toString()
 }
 
 async function getAccountAddresses() {
@@ -48,17 +65,6 @@ function getAccounts() {
 
 function deployContract(contractName) {
 	return run("deploy", { contract: contractName, quiet: true })
-}
-
-function getSnarkHash(hash) {
-	const snarkHash = []
-
-	for (let i = 0; i < 8; i++) {
-		const j = i * 8
-		snarkHash.push(`0x${hash.substring(j, j + 8)}`)
-	}
-
-	return snarkHash
 }
 
 function stringToBytes32(s) {
@@ -86,7 +92,8 @@ function bytes32ToString(s) {
 }
 
 module.exports = {
-	sha256,
+	createProof,
+	getProjectConfig,
 	getAccounts,
 	getAccountAddresses,
 	deployContract,
@@ -94,6 +101,5 @@ module.exports = {
 	stringToBytes32,
 	hexToDecimal,
 	decimalToHex,
-	createAccount,
-	getSnarkHash
+	createAccount
 }
