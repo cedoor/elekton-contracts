@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.6.1;
+pragma solidity ^0.6.11;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@nomiclabs/buidler/console.sol";
+import "./Verifier.sol";
 
 
-contract Elekton is Ownable {
-
-    /** Events & structures **/
+contract Elekton is Ownable, Verifier {
 
     event UserCreated (address indexed);
 
@@ -19,12 +18,8 @@ contract Elekton is Ownable {
         bool isAdmin;
     }
 
-    /** Storage **/
-
     mapping(address => User) private users;
     mapping(bytes32 => bool) private usernames;
-
-    /** Functions **/
 
     function createAdmin(bytes32 _name, bytes32 _surname, bytes32 _username) external {
         createUser(_name, _surname, _username, true, _msgSender());
