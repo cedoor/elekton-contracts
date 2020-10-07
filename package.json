@@ -43,7 +43,8 @@
     "ffjavascript": "^0.2.23",
     "js-logger": "^1.6.0",
     "prettier": "2.1.2",
-    "snarkjs": "^0.3.34"
+    "snarkjs": "^0.3.34",
+    "tweetnacl": "^1.0.3"
   },
   "config": {
     "solidity": {
