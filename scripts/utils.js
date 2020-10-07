@@ -1,6 +1,6 @@
 const { config } = require(`${__dirname}/../package.json`)
 const { ethers, run } = require("@nomiclabs/buidler")
-const { eddsa } = require("circomlib")
+const { eddsa, smt, poseidon } = require("circomlib")
 const snarkjs = require("snarkjs")
 const { Scalar, utils } = require("ffjavascript")
 const createBlakeHash = require("blake-hash")
@@ -10,16 +10,53 @@ function getProjectConfig() {
 	return config
 }
 
+async function createAccounts(n) {
+	let accounts = []
+
+	for (let i = 0; i < n; i++) {
+		accounts.push(await createAccount())
+	}
+
+	return accounts
+}
+
 function createAccount() {
-	const rawpvk = crypto.randomBytes(32).toString("hex")
-	const pvk = eddsa.pruneBuffer(createBlakeHash("blake512").update(rawpvk).digest().slice(0, 32))
-	const privateKey = Scalar.shr(utils.leBuff2int(pvk), 3)
-	const publicKey = eddsa.prv2pub(rawpvk)
+	const privateKey = crypto.randomBytes(32)
+	const publicKey = eddsa.prv2pub(privateKey)
 
 	return { privateKey, publicKey }
 }
 
-async function createProof(input) {
+async function createElektonProof(publicKeys, electionId, account, vote) {
+	const ppk = processPrivateKey(account.privateKey)
+	const signature = eddsa.signPoseidon(account.privateKey, vote)
+	const nullifier = poseidon([electionId, ppk])
+	const tree = await smt.newMemEmptyTrie()
+
+	for (const publicKey of publicKeys) {
+		await tree.insert(...publicKey)
+	}
+
+	const { siblings } = await tree.find(account.publicKey[0])
+
+	while (siblings.length < 10) {
+		siblings.push(0n)
+	}
+
+	return getProofParameters({
+		privateKey: ppk,
+		R8x: signature.R8[0],
+		R8y: signature.R8[1],
+		S: signature.S,
+		smtSiblings: siblings,
+		smtRoot: tree.root,
+		encryptedVote: vote,
+		electionId,
+		nullifier
+	})
+}
+
+async function getProofParameters(input) {
 	const { proof, publicSignals } = await snarkjs.groth16.fullProve(
 		input,
 		`${config.paths.build.snark}/main.wasm`,
@@ -37,30 +74,22 @@ async function createProof(input) {
 	]
 }
 
+function processPrivateKey(privateKey) {
+	const blakeHash = createBlakeHash("blake512").update(privateKey).digest()
+	const sBuff = eddsa.pruneBuffer(blakeHash.slice(0, 32))
+	const s = utils.leBuff2int(sBuff)
+
+	return Scalar.shr(s, 3)
+}
+
 function padNumberAs64Hex(n) {
-	let hex = decimalToHex(n)
+	let hex = BigInt(n).toString("16")
 
 	while (hex.length < 64) {
 		hex = "0" + hex
 	}
 
 	return `0x${hex}`
-}
-
-function decimalToHex(decimal) {
-	return ethers.BigNumber.from(decimal).toHexString().substring(2)
-}
-
-function hexToDecimal(hex) {
-	return ethers.BigNumber.from(`0x${hex}`).toString()
-}
-
-async function getAccountAddresses() {
-	return Promise.all((await ethers.getSigners()).map((account) => account.getAddress()))
-}
-
-function getAccounts() {
-	return ethers.getSigners()
 }
 
 function deployContract(contractName) {
@@ -92,14 +121,11 @@ function bytes32ToString(s) {
 }
 
 module.exports = {
-	createProof,
+	createElektonProof,
 	getProjectConfig,
-	getAccounts,
-	getAccountAddresses,
 	deployContract,
 	bytes32ToString,
 	stringToBytes32,
-	hexToDecimal,
-	decimalToHex,
-	createAccount
+	createAccount,
+	createAccounts
 }
