@@ -16,7 +16,7 @@ async function main() {
 	}
 
 	if (!fs.existsSync(`${paths.build.snark}/pot12_beacon.ptau`)) {
-		await snarkjs.powersOfTau.newAccumulator(await buildBn128(), 12, `${paths.build.snark}/pot12_0000.ptau`, logger)
+		await snarkjs.powersOfTau.newAccumulator(await buildBn128(), 15, `${paths.build.snark}/pot12_0000.ptau`, logger)
 		await snarkjs.powersOfTau.beacon(
 			`${paths.build.snark}/pot12_0000.ptau`,
 			`${paths.build.snark}/pot12_beacon.ptau`,
