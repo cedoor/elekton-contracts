@@ -12,7 +12,7 @@ template Elekton (nLevels) {
     signal private input smtSiblings[nLevels];
     signal input smtRoot;
     signal input encryptedVote;
-    signal input electionId;
+    signal input ballotAddress;
     signal input nullifier;
 
     var i;
@@ -41,7 +41,7 @@ template Elekton (nLevels) {
     eddsaPoseidonVerifier.M <== encryptedVote;
 
     component poseidon = Poseidon(2);
-    poseidon.inputs[0] <== electionId;
+    poseidon.inputs[0] <== ballotAddress;
     poseidon.inputs[1] <== privateKey;
 
     nullifier === poseidon.out;
