@@ -1,79 +1,57 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.6.11;
+// pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@nomiclabs/buidler/console.sol";
 import "./Verifier.sol";
+import "./Ballot.sol";
 
+contract Elekton is Ownable {
 
-contract Elekton is Ownable, Verifier {
+    event AdminCreated (address);
+    event VoterCreated (bytes32);
+    event BallotCreated (Ballot);
 
-    event UserCreated (address indexed);
-
-    struct User {
+    struct Voter {
+        bytes32 publicKey;
+        bytes32 username;
         bytes32 name;
         bytes32 surname;
-        bytes32 username;
-        bool isAdmin;
     }
 
-    struct Election {
-        bytes32[] electors;
-        uint[] votes;
+    mapping(address => bool) public isAdmin;
+    mapping(bytes32 => bool) public isUsername;
+
+    Voter[] public voters;
+    Ballot[] public ballots;
+
+    function createAdmin() external {
+        isAdmin[_msgSender()] = true;
     }
 
-    mapping(address => User) private users;
-    mapping(bytes32 => bool) private usernames;
-    mapping(uint => Election) private elections;
+    function createVoter(bytes32 _publicKey, bytes32 _username, bytes32 _name, bytes32 _surname) external {
+        require(!isUsername[_username], "username-already-exists");
 
-    function createAdmin(bytes32 _name, bytes32 _surname, bytes32 _username) external {
-        createUser(_name, _surname, _username, true, _msgSender());
+        Voter memory voter = Voter( _publicKey, _username, _name, _surname);
+
+        voters.push(voter);
     }
 
-    function createElector(bytes32 _name, bytes32 _surname, bytes32 _username) external {
-        createUser(_name, _surname, _username, false, _msgSender());
-    }
+    function createBallot(
+        bytes32 _name,
+        bytes32 _question,
+        bytes32[] calldata _proposals,
+        bytes32[] calldata _voters,
+        uint _smtRoot,
+        uint _startDate,
+        uint _endDate,
+        bytes32 _encryptionKey
+    ) external {
+        require(isAdmin[_msgSender()], "you-are-not-admin");
 
-    function getUser() external view returns (bytes32 name, bytes32 surname, bytes32 username, bool isAdmin) {
-        User storage user = users[_msgSender()];
-
-        return (user.name, user.surname, user.username, user.isAdmin);
-    }
-
-    function createUser(bytes32 _name, bytes32 _surname, bytes32 _username, bool _isAdmin, address _address) private {
-        require(!usernames[_username], "username-already-exists");
-
-        User storage user = users[_address];
-
-        user.name = _name;
-        user.surname = _surname;
-        user.username = _username;
-        user.isAdmin = _isAdmin;
-
-        usernames[_username] = true;
-
-        emit UserCreated(_address);
-    }
-
-    function createElection(uint _id, bytes32[] calldata _electors) external {
-        Election storage election = elections[_id];
-
-        election.electors = _electors;
-    }
-
-    function getElection(uint _id) external view returns (bytes32[] memory electors, uint[] memory votes) {
-        Election storage election = elections[_id];
-
-        return (election.electors, election.votes);
-    }
-
-    function vote(uint[2] memory a, uint[2][2] memory b, uint[2] memory c, uint[4] memory input) external {
-        require(verifyProof(a, b, c, input), "invalid-proof");
-
-        Election storage election = elections[input[2]];
-
-        election.votes.push(input[1]);
+        ballots.push(new Ballot(_name, _question, _proposals, _voters, _smtRoot, _startDate, _endDate, _encryptionKey, _msgSender()));
     }
 
 }
