@@ -10,32 +10,42 @@ function getProjectConfig() {
 	return config
 }
 
-async function createAccounts(n) {
+async function getEthereumAccounts() {
+	return ethers.getSigners()
+}
+
+function createVoterAccounts(n) {
 	let accounts = []
 
 	for (let i = 0; i < n; i++) {
-		accounts.push(await createAccount())
+		accounts.push(createVoterAccount())
 	}
 
 	return accounts
 }
 
-function createAccount() {
+function createVoterAccount() {
 	const privateKey = crypto.randomBytes(32)
 	const publicKey = eddsa.prv2pub(privateKey)
 
 	return { privateKey, publicKey }
 }
 
-async function createElektonProof(publicKeys, electionId, account, vote) {
-	const ppk = processPrivateKey(account.privateKey)
-	const signature = eddsa.signPoseidon(account.privateKey, vote)
-	const nullifier = poseidon([electionId, ppk])
+async function getSmt(publicKeys) {
 	const tree = await smt.newMemEmptyTrie()
 
 	for (const publicKey of publicKeys) {
 		await tree.insert(...publicKey)
 	}
+
+	return tree
+}
+
+async function createElektonProof(publicKeys, ballotAddress, account, vote) {
+	const ppk = processPrivateKey(account.privateKey)
+	const signature = eddsa.signPoseidon(account.privateKey, vote)
+	const nullifier = poseidon([ballotAddress, ppk])
+	const tree = await getSmt(publicKeys)
 
 	const { siblings } = await tree.find(account.publicKey[0])
 
@@ -51,7 +61,7 @@ async function createElektonProof(publicKeys, electionId, account, vote) {
 		smtSiblings: siblings,
 		smtRoot: tree.root,
 		encryptedVote: vote,
-		electionId,
+		ballotAddress,
 		nullifier
 	})
 }
@@ -92,8 +102,19 @@ function padNumberAs64Hex(n) {
 	return `0x${hex}`
 }
 
-function deployContract(contractName) {
-	return run("deploy", { contract: contractName, quiet: true })
+async function deployContract(contractName) {
+	const ContractFactory = await ethers.getContractFactory(contractName)
+	const instance = await ContractFactory.deploy()
+
+	await instance.deployed()
+
+	return instance
+}
+
+async function attachContract(contractName, address) {
+	const ContractFactory = await ethers.getContractFactory(contractName)
+
+	return ContractFactory.attach(address)
 }
 
 function stringToBytes32(s) {
@@ -121,11 +142,13 @@ function bytes32ToString(s) {
 }
 
 module.exports = {
+	getSmt,
 	createElektonProof,
 	getProjectConfig,
 	deployContract,
+	attachContract,
 	bytes32ToString,
 	stringToBytes32,
-	createAccount,
-	createAccounts
+	createVoterAccounts,
+	getEthereumAccounts
 }
