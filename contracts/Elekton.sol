@@ -4,7 +4,6 @@ pragma solidity ^0.6.11;
 // pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@nomiclabs/buidler/console.sol";
 import "./Verifier.sol";
 import "./Ballot.sol";
 

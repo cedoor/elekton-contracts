@@ -1,11 +1,11 @@
 const { config } = require("./package.json")
-const { task, types } = require("@nomiclabs/buidler/config")
+const { task, types } = require("hardhat/config")
 
-usePlugin("@nomiclabs/buidler-waffle")
-usePlugin("@nomiclabs/buidler-ethers")
-usePlugin("@nomiclabs/buidler-solhint")
+require("@nomiclabs/hardhat-waffle")
+require("@nomiclabs/hardhat-ethers")
+require("@nomiclabs/hardhat-solhint")
 
-// https://buidler.dev/guides/create-task.html
+// https://hardhat.org/guides/create-task.html
 
 task("deploy", "Deploy a contract instance")
 	.addParam("contract", "The name of the contract", undefined, types.string)
@@ -23,9 +23,9 @@ task("deploy", "Deploy a contract instance")
 		return instance
 	})
 
-// https://buidler.dev/config/
+// https://hardhat.org/config/
 module.exports = {
-	solc: {
+	solidity: {
 		version: config.solidity.version
 	},
 	paths: {

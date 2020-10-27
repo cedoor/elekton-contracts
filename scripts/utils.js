@@ -1,5 +1,5 @@
 const { config } = require(`${__dirname}/../package.json`)
-const { ethers, run } = require("@nomiclabs/buidler")
+const { ethers, run } = require("hardhat")
 const { eddsa, smt, poseidon } = require("circomlib")
 const snarkjs = require("snarkjs")
 const { Scalar, utils } = require("ffjavascript")
