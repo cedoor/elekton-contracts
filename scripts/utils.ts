@@ -1,20 +1,21 @@
-const { config } = require(`${__dirname}/../package.json`)
-const { ethers, run } = require("hardhat")
-const { eddsa, smt, poseidon } = require("circomlib")
-const snarkjs = require("snarkjs")
-const { Scalar, utils } = require("ffjavascript")
-const createBlakeHash = require("blake-hash")
-const crypto = require("crypto")
+import createBlakeHash from "blake-hash"
+import { eddsa, poseidon, smt } from "circomlib"
+import crypto from "crypto"
+import { Contract } from "ethers"
+import { Scalar, utils } from "ffjavascript"
+import { ethers } from "hardhat"
+import { groth16 } from "snarkjs"
+import { config } from "../package.json"
 
-function getProjectConfig() {
+export function getProjectConfig() {
 	return config
 }
 
-async function getEthereumAccounts() {
+export async function getEthereumAccounts() {
 	return ethers.getSigners()
 }
 
-function createVoterAccounts(n) {
+export function createVoterAccounts(n: number) {
 	let accounts = []
 
 	for (let i = 0; i < n; i++) {
@@ -31,7 +32,7 @@ function createVoterAccount() {
 	return { privateKey, publicKey }
 }
 
-async function getSmt(publicKeys) {
+export async function getSmt(publicKeys: any[]) {
 	const tree = await smt.newMemEmptyTrie()
 
 	for (const publicKey of publicKeys) {
@@ -41,7 +42,7 @@ async function getSmt(publicKeys) {
 	return tree
 }
 
-async function createElektonProof(publicKeys, ballotAddress, account, vote) {
+export async function createElektonProof(publicKeys: any[], ballotAddress: BigInt, account: any, vote: BigInt) {
 	const ppk = processPrivateKey(account.privateKey)
 	const signature = eddsa.signPoseidon(account.privateKey, vote)
 	const nullifier = poseidon([ballotAddress, ppk])
@@ -66,8 +67,8 @@ async function createElektonProof(publicKeys, ballotAddress, account, vote) {
 	})
 }
 
-async function getProofParameters(input) {
-	const { proof, publicSignals } = await snarkjs.groth16.fullProve(
+async function getProofParameters(input: any) {
+	const { proof, publicSignals } = await groth16.fullProve(
 		input,
 		`${config.paths.build.snark}/main.wasm`,
 		`${config.paths.build.snark}/circuit_final.zkey`
@@ -80,11 +81,11 @@ async function getProofParameters(input) {
 			[padNumberAs64Hex(proof.pi_b[1][1]), padNumberAs64Hex(proof.pi_b[1][0])]
 		],
 		[padNumberAs64Hex(proof.pi_c[0]), padNumberAs64Hex(proof.pi_c[1])],
-		publicSignals.map((n) => padNumberAs64Hex(n))
+		publicSignals.map((n: any) => padNumberAs64Hex(n))
 	]
 }
 
-function processPrivateKey(privateKey) {
+function processPrivateKey(privateKey: BigInt) {
 	const blakeHash = createBlakeHash("blake512").update(privateKey).digest()
 	const sBuff = eddsa.pruneBuffer(blakeHash.slice(0, 32))
 	const s = utils.leBuff2int(sBuff)
@@ -92,8 +93,8 @@ function processPrivateKey(privateKey) {
 	return Scalar.shr(s, 3)
 }
 
-function padNumberAs64Hex(n) {
-	let hex = BigInt(n).toString("16")
+function padNumberAs64Hex(n: any) {
+	let hex = BigInt(n).toString(16)
 
 	while (hex.length < 64) {
 		hex = "0" + hex
@@ -102,7 +103,7 @@ function padNumberAs64Hex(n) {
 	return `0x${hex}`
 }
 
-async function deployContract(contractName) {
+export async function deployContract(contractName: string): Promise<Contract> {
 	const ContractFactory = await ethers.getContractFactory(contractName)
 	const instance = await ContractFactory.deploy()
 
@@ -111,44 +112,32 @@ async function deployContract(contractName) {
 	return instance
 }
 
-async function attachContract(contractName, address) {
+export async function attachContract(contractName: string, address: string) {
 	const ContractFactory = await ethers.getContractFactory(contractName)
 
 	return ContractFactory.attach(address)
 }
 
-function stringToBytes32(s) {
+export function stringToBytes32(s: string | string[]): string | string[] {
 	if (!Array.isArray(s) && typeof s !== "string") {
 		throw TypeError("Parameter must be a string or an array of strings")
 	}
 
 	if (Array.isArray(s)) {
-		return s.map(stringToBytes32)
+		return s.map((s) => stringToBytes32(s) as string)
 	}
 
 	return ethers.utils.formatBytes32String(s)
 }
 
-function bytes32ToString(s) {
+export function bytes32ToString(s: string | string[]): string | string[] {
 	if (!Array.isArray(s) && typeof s !== "string") {
 		throw TypeError("Parameter must be a string or an array of strings")
 	}
 
 	if (Array.isArray(s)) {
-		return s.map(bytes32ToString)
+		return s.map((s) => bytes32ToString(s) as string)
 	}
 
 	return ethers.utils.parseBytes32String(s)
-}
-
-module.exports = {
-	getSmt,
-	createElektonProof,
-	getProjectConfig,
-	deployContract,
-	attachContract,
-	bytes32ToString,
-	stringToBytes32,
-	createVoterAccounts,
-	getEthereumAccounts
 }

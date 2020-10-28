@@ -1,6 +1,7 @@
-const { expect } = require("chai")
-const { babyJub } = require("circomlib")
-const {
+import { expect } from "chai"
+import { babyJub } from "circomlib"
+import { Contract } from "ethers"
+import {
 	deployContract,
 	attachContract,
 	createVoterAccounts,
@@ -8,17 +9,16 @@ const {
 	getSmt,
 	getEthereumAccounts,
 	stringToBytes32
-} = require("../scripts/utils")
+} from "../scripts/utils"
 
 describe("Elekton", function () {
-	let ethereumAccounts
-	let elekton
-	let admin
-	let ballot
-	let voterAccounts
+	let elekton: Contract
+	let admin: any
+	let ballot: any
+	let voterAccounts: any
 
 	before(async function () {
-		ethereumAccounts = await getEthereumAccounts()
+		const ethereumAccounts = await getEthereumAccounts()
 		elekton = await deployContract("Elekton")
 		admin = elekton.connect(ethereumAccounts[1])
 		voterAccounts = createVoterAccounts(5)

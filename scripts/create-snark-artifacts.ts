@@ -1,10 +1,10 @@
-const fs = require("fs")
-const circom = require("circom")
-const snarkjs = require("snarkjs")
-const { buildBn128 } = require("ffjavascript")
-const { getProjectConfig } = require("./utils.js")
-const fastFile = require("fastfile")
-const logger = require("js-logger")
+import fs from "fs"
+import circom from "circom"
+import snarkjs from "snarkjs"
+import { buildBn128 } from "ffjavascript"
+import { getProjectConfig } from "./utils.js"
+import fastFile from "fastfile"
+import logger from "js-logger"
 
 logger.useDefaults()
 

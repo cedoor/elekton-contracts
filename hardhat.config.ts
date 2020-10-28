@@ -1,17 +1,18 @@
-const { config } = require("./package.json")
-const { task, types } = require("hardhat/config")
+import { config } from "./package.json"
+import { task, types, HardhatUserConfig } from "hardhat/config"
 
-require("@nomiclabs/hardhat-waffle")
-require("@nomiclabs/hardhat-ethers")
-require("@nomiclabs/hardhat-solhint")
+import "@nomiclabs/hardhat-waffle"
+import "@nomiclabs/hardhat-ethers"
+import "@nomiclabs/hardhat-solhint"
 
 // https://hardhat.org/guides/create-task.html
 
 task("deploy", "Deploy a contract instance")
 	.addParam("contract", "The name of the contract", undefined, types.string)
 	.addOptionalParam("quiet", "To quiet output messages", false, types.boolean)
-	.setAction(async ({ contract, quiet }) => {
-		const ContractFactory = await ethers.getContractFactory(contract)
+	.setAction(async (args, hre) => {
+		const { contract, quiet } = args
+		const ContractFactory = await hre.ethers.getContractFactory(contract)
 		const instance = await ContractFactory.deploy()
 
 		await instance.deployed()
@@ -24,7 +25,7 @@ task("deploy", "Deploy a contract instance")
 	})
 
 // https://hardhat.org/config/
-module.exports = {
+const hardhatConfig: HardhatUserConfig = {
 	solidity: {
 		version: config.solidity.version
 	},
@@ -35,3 +36,5 @@ module.exports = {
 		artifacts: config.paths.build.contracts
 	}
 }
+
+export default hardhatConfig
