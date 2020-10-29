@@ -1,56 +1,67 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.6.11;
-// pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Verifier.sol";
-import "./Ballot.sol";
 
-contract Elekton is Ownable {
+contract Elekton is Ownable, Verifier {
 
-    event AdminCreated (address);
-    event VoterCreated (bytes32);
-    event BallotCreated (Ballot);
+    event UserCreated (address, uint);
+    event BallotCreated (uint);
+    event VoteAdded (uint, uint);
+    event PollKeyPublished (uint, uint);
 
-    struct Voter {
-        bytes32 publicKey;
-        bytes32 username;
-        bytes32 name;
-        bytes32 surname;
+    struct Ballot {
+        address admin;
+        uint smtRoot;
+        uint startDate;
+        uint endDate;
+        uint[] votes;
+        uint pollKey;
     }
 
-    mapping(address => bool) public isAdmin;
-    mapping(bytes32 => bool) public isUsername;
+    mapping(address => uint) public users;
+    mapping(uint => Ballot) public ballots;
+    mapping(uint => bool) voteNullifier;
 
-    Voter[] public voters;
-    Ballot[] public ballots;
+    function createUser(uint _id) external {
+        users[_msgSender()] = _id;
 
-    function createAdmin() external {
-        isAdmin[_msgSender()] = true;
+        emit UserCreated(_msgSender(), _id);
     }
 
-    function createVoter(bytes32 _publicKey, bytes32 _username, bytes32 _name, bytes32 _surname) external {
-        require(!isUsername[_username], "username-already-exists");
+    function createBallot(uint _id, uint _smtRoot, uint _startDate, uint _endDate) external {
+        require(users[_msgSender()] != 0, "you-are-not-user");
 
-        Voter memory voter = Voter( _publicKey, _username, _name, _surname);
+        ballots[_id].admin = _msgSender();
+        ballots[_id].smtRoot = _smtRoot;
+        ballots[_id].startDate = _startDate;
+        ballots[_id].endDate = _endDate;
 
-        voters.push(voter);
+        emit BallotCreated(_id);
     }
 
-    function createBallot(
-        bytes32 _name,
-        bytes32 _question,
-        bytes32[] calldata _proposals,
-        bytes32[] calldata _voters,
-        uint _smtRoot,
-        uint _startDate,
-        uint _endDate,
-        bytes32 _encryptionKey
-    ) external {
-        require(isAdmin[_msgSender()], "you-are-not-admin");
+    function vote(uint[2] calldata a, uint[2][2] calldata b, uint[2] calldata c, uint[4] calldata input) external {
+        require(ballots[input[2]].admin!= address(0), "wrong-ballot-id");
+        require(now > ballots[input[2]].startDate, "invalid-vote-in-advance");
+        require(now < ballots[input[2]].endDate, "invalid-late-vote");
+        require(input[0] == ballots[input[2]].smtRoot, "wrong-smt-root");
+        require(!voteNullifier[input[3]], "voter-has-already-voted");
+        require(verifyProof(a, b, c, input), "invalid-voting-proof");
 
-        ballots.push(new Ballot(_name, _question, _proposals, _voters, _smtRoot, _startDate, _endDate, _encryptionKey, _msgSender()));
+        voteNullifier[input[3]] = true;
+        ballots[input[2]].votes.push(input[1]);
+
+        emit VoteAdded(input[2], input[1]);
     }
 
+    function publishPollKey(uint _ballotId, uint _pollKey) external {
+        require(ballots[_ballotId].admin == _msgSender(), "you-are-not-ballot-user");
+        require(now > ballots[_ballotId].endDate, "voting-in-progress");
+
+        ballots[_ballotId].pollKey = _pollKey;
+
+        emit PollKeyPublished(_ballotId, _pollKey);
+    }
 }
