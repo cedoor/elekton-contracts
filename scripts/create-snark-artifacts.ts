@@ -1,9 +1,9 @@
 import fs from "fs"
 import circom from "circom"
-import snarkjs from "snarkjs"
+import { powersOfTau, r1cs, zKey } from "snarkjs"
 import { buildBn128 } from "ffjavascript"
-import { getProjectConfig } from "./utils.js"
-import fastFile from "fastfile"
+import { getProjectConfig } from "./utils"
+import * as fastFile from "fastfile"
 import logger from "js-logger"
 
 logger.useDefaults()
@@ -16,8 +16,8 @@ async function main() {
 	}
 
 	if (!fs.existsSync(`${paths.build.snark}/pot12_beacon.ptau`)) {
-		await snarkjs.powersOfTau.newAccumulator(await buildBn128(), 15, `${paths.build.snark}/pot12_0000.ptau`, logger)
-		await snarkjs.powersOfTau.beacon(
+		await powersOfTau.newAccumulator(await buildBn128(), 15, `${paths.build.snark}/pot12_0000.ptau`, logger)
+		await powersOfTau.beacon(
 			`${paths.build.snark}/pot12_0000.ptau`,
 			`${paths.build.snark}/pot12_beacon.ptau`,
 			"Final beacon",
@@ -25,7 +25,7 @@ async function main() {
 			10,
 			logger
 		)
-		await snarkjs.powersOfTau.preparePhase2(
+		await powersOfTau.preparePhase2(
 			`${paths.build.snark}/pot12_beacon.ptau`,
 			`${paths.build.snark}/pot12_final.ptau`,
 			logger
@@ -38,15 +38,15 @@ async function main() {
 		symWriteStream: fs.createWriteStream(`${paths.build.snark}/main.sym`)
 	})
 
-	await snarkjs.r1cs.info(`${paths.build.snark}/main.r1cs`, logger)
+	await r1cs.info(`${paths.build.snark}/main.r1cs`, logger)
 
-	await snarkjs.zKey.newZKey(
+	await zKey.newZKey(
 		`${paths.build.snark}/main.r1cs`,
 		`${paths.build.snark}/pot12_final.ptau`,
 		`${paths.build.snark}/circuit_0000.zkey`,
 		logger
 	)
-	await snarkjs.zKey.beacon(
+	await zKey.beacon(
 		`${paths.build.snark}/circuit_0000.zkey`,
 		`${paths.build.snark}/circuit_final.zkey`,
 		"Final beacon",
@@ -55,8 +55,8 @@ async function main() {
 		logger
 	)
 
-	const verificationKey = await snarkjs.zKey.exportVerificationKey(`${paths.build.snark}/circuit_final.zkey`, logger)
-	const verifierCode = await snarkjs.zKey.exportSolidityVerifier(
+	const verificationKey = await zKey.exportVerificationKey(`${paths.build.snark}/circuit_final.zkey`, logger)
+	const verifierCode = await zKey.exportSolidityVerifier(
 		`${paths.build.snark}/circuit_final.zkey`,
 		`./node_modules/snarkjs/templates/verifier_groth16.sol`,
 		logger
