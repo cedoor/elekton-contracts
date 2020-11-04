@@ -488,13 +488,6 @@
   resolved "https://registry.yarnpkg.com/@nomiclabs/hardhat-ethers/-/hardhat-ethers-2.0.0.tgz#ebab032b3aed03945ea560f56bb67aec56a30cbc"
   integrity sha512-fIi6XP9PgKqwSNVcLDr6S5hvGlc21PendaLD5eGdXEXc9aYQ0OJX8Mk3evs+p78x7W9n9U3ZcKtTiGc1+YScDw==
 
-"@nomiclabs/hardhat-solhint@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@nomiclabs/hardhat-solhint/-/hardhat-solhint-2.0.0.tgz#28f2c6b50709a91538ba69c1c8fe60985bf920f3"
-  integrity sha512-fn+izC923/oCnfbGyp7YwOXZYtwcrDIrTLlFVeEgeSAHe2ZnipRRtNCxEClZuzCptHmTzIIayBmAaijsTmEAoA==
-  dependencies:
-    solhint "^2.0.0"
-
 "@nomiclabs/hardhat-waffle@^2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@nomiclabs/hardhat-waffle/-/hardhat-waffle-2.0.0.tgz#b06533c802da1a9d614e432f719d2816384df9b3"
@@ -622,6 +615,11 @@
   version "0.7.1"
   resolved "https://registry.yarnpkg.com/@solidity-parser/parser/-/parser-0.7.1.tgz#660210130e4237476cb55e2882064809f80f861e"
   integrity sha512-5ma2uuwPAEX1TPl2rAPAAuGlBkKnn2oUKQvnhTFlDIB8U/KDWX77FpHtL6Rcz+OwqSCWx9IClxACgyIEJ/GhIw==
+
+"@solidity-parser/parser@^0.8.1":
+  version "0.8.1"
+  resolved "https://registry.yarnpkg.com/@solidity-parser/parser/-/parser-0.8.1.tgz#1b606578af86b9ad10755409804a6ba83f9ce8a4"
+  integrity sha512-DF7H6T8I4lo2IZOE2NZwt3631T8j1gjpQLjmvY2xBNK50c4ltslR4XPKwT6RkeSd4+xCAK0GHC/k7sbRDBE4Yw==
 
 "@szmarczak/http-timer@^1.1.2":
   version "1.1.2"
@@ -956,6 +954,11 @@ assign-symbols@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/assign-symbols/-/assign-symbols-1.0.0.tgz#59667f41fadd4f20ccbc2bb96b8d4f7f78ec0367"
   integrity sha1-WWZ/QfrdTyDMvCu5a41Pf3jsA2c=
+
+ast-parents@0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/ast-parents/-/ast-parents-0.0.1.tgz#508fd0f05d0c48775d9eccda2e174423261e8dd3"
+  integrity sha1-UI/Q8F0MSHddnszaLhdEIyYejdM=
 
 astral-regex@^1.0.0:
   version "1.0.0"
@@ -6852,13 +6855,15 @@ solc@^0.6.3:
     semver "^5.5.0"
     tmp "0.0.33"
 
-solhint@^2.0.0:
-  version "2.3.1"
-  resolved "https://registry.yarnpkg.com/solhint/-/solhint-2.3.1.tgz#6fee8fc2635112bf5812f7cba8359c14e9d9a491"
-  integrity sha512-wP/G+Dqj8LNWlCI9Mt6XiQRWQfZwv1rkZe/V+HKtip5SAZJVvp144PdH28KE45ZvR99Hhrp/Mujt74fSmXsFiw==
+solhint@^3.3.1:
+  version "3.3.1"
+  resolved "https://registry.yarnpkg.com/solhint/-/solhint-3.3.1.tgz#7aa02afb79ad2bcfa64885b1fe134e220949546f"
+  integrity sha512-JXAOLM2UQrLOtx4fKXzleq6CR0N7AlRfki+dFyvab93x4DoHeHQ4Ic2LMScT8V0AddXgbKtR8xdIIZKLh07dNg==
   dependencies:
+    "@solidity-parser/parser" "^0.8.1"
     ajv "^6.6.1"
     antlr4 "4.7.1"
+    ast-parents "0.0.1"
     chalk "^2.4.2"
     commander "2.18.0"
     cosmiconfig "^5.0.7"

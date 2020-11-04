@@ -3,7 +3,6 @@ import { task, types, HardhatUserConfig } from "hardhat/config"
 
 import "@nomiclabs/hardhat-waffle"
 import "@nomiclabs/hardhat-ethers"
-import "@nomiclabs/hardhat-solhint"
 
 // https://hardhat.org/guides/create-task.html
 
