@@ -11,11 +11,16 @@ export function getProjectConfig() {
 	return config
 }
 
-export async function getEthereumAccounts() {
-	return ethers.getSigners()
+export async function getAccounts() {
+	const voters = createVoterAccounts(20)
+
+	return (await ethers.getSigners()).map((signer, i) => ({
+		signer,
+		voter: voters[i]
+	}))
 }
 
-export function createVoterAccounts(n: number) {
+function createVoterAccounts(n: number) {
 	let accounts = []
 
 	for (let i = 0; i < n; i++) {
@@ -116,6 +121,12 @@ export async function attachContract(contractName: string, address: string) {
 	const ContractFactory = await ethers.getContractFactory(contractName)
 
 	return ContractFactory.attach(address)
+}
+
+export function delay(duration = 5000) {
+	return new Promise((resolve) => {
+		setTimeout(resolve, duration)
+	})
 }
 
 export function stringToBytes32(s: string | string[]): string | string[] {
