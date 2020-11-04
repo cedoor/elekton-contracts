@@ -9,7 +9,7 @@ contract Elekton is Ownable, Verifier {
 
     event UserCreated (address, uint);
     event BallotCreated (uint);
-    event VoteAdded (uint, uint);
+    event VoteAdded (uint indexed, uint);
     event PollKeyPublished (uint, uint);
 
     struct Ballot {
@@ -42,26 +42,27 @@ contract Elekton is Ownable, Verifier {
         emit BallotCreated(_id);
     }
 
-    function vote(uint[2] calldata a, uint[2][2] calldata b, uint[2] calldata c, uint[4] calldata input) external {
-        require(ballots[input[2]].admin!= address(0), "wrong-ballot-id");
-        require(now > ballots[input[2]].startDate, "invalid-vote-in-advance");
-        require(now < ballots[input[2]].endDate, "invalid-late-vote");
-        require(input[0] == ballots[input[2]].smtRoot, "wrong-smt-root");
-        require(!voteNullifier[input[3]], "voter-has-already-voted");
-        require(verifyProof(a, b, c, input), "invalid-voting-proof");
+    function vote(uint[2] calldata _a, uint[2][2] calldata _b, uint[2] calldata _c, uint[4] calldata _input) external {
+        require(ballots[_input[2]].admin!= address(0), "wrong-ballot-id");
+        require(block.timestamp > ballots[_input[2]].startDate, "invalid-vote-in-advance");
+        require(block.timestamp < ballots[_input[2]].endDate, "invalid-late-vote");
+        require(_input[0] == ballots[_input[2]].smtRoot, "wrong-smt-root");
+        require(!voteNullifier[_input[3]], "voter-has-already-voted");
+        require(verifyProof(_a, _b, _c, _input), "invalid-voting-proof");
 
-        voteNullifier[input[3]] = true;
-        ballots[input[2]].votes.push(input[1]);
+        voteNullifier[_input[3]] = true;
+        ballots[_input[2]].votes.push(_input[1]);
 
-        emit VoteAdded(input[2], input[1]);
+        emit VoteAdded(_input[2], _input[1]);
     }
 
     function publishPollKey(uint _ballotId, uint _pollKey) external {
         require(ballots[_ballotId].admin == _msgSender(), "you-are-not-ballot-user");
-        require(now > ballots[_ballotId].endDate, "voting-in-progress");
+        require(block.timestamp > ballots[_ballotId].endDate, "voting-in-progress");
 
         ballots[_ballotId].pollKey = _pollKey;
 
         emit PollKeyPublished(_ballotId, _pollKey);
     }
+
 }
