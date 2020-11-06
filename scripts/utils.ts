@@ -12,9 +12,10 @@ export function getProjectConfig() {
 }
 
 export async function getAccounts() {
-	const voters = createVoterAccounts(20)
+	const signers = await ethers.getSigners()
+	const voters = createVoterAccounts(signers.length)
 
-	return (await ethers.getSigners()).map((signer, i) => ({
+	return signers.map((signer, i) => ({
 		signer,
 		voter: voters[i]
 	}))
