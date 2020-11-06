@@ -33,6 +33,13 @@ const hardhatConfig: HardhatUserConfig = {
 		tests: config.paths.tests,
 		cache: config.paths.cache,
 		artifacts: config.paths.build.contracts
+	},
+	networks: {
+		hardhat: {
+			accounts: {
+				count: 100
+			}
+		}
 	}
 }
 
