@@ -8,6 +8,7 @@ import "./Verifier.sol";
 contract Elekton is Ownable, Verifier {
 
     event UserCreated (address, uint);
+    event UserUpdated (address, uint);
     event BallotCreated (uint);
     event VoteAdded (uint indexed, uint);
     event PollKeyPublished (uint, uint);
@@ -25,21 +26,30 @@ contract Elekton is Ownable, Verifier {
     mapping(uint => Ballot) public ballots;
     mapping(uint => bool) voteNullifier;
 
-    function createUser(uint _id) external {
-        users[_msgSender()] = _id;
+    function createUser(uint _userId) external {
+        require(_userId != 0, "user-id-cannot-be-0");
+        require(users[_msgSender()] != _userId, "user-id-cannot-be-same");
 
-        emit UserCreated(_msgSender(), _id);
+        uint currentId = users[_msgSender()];
+
+        users[_msgSender()] = _userId;
+
+        if (currentId == 0) {
+            emit UserCreated(_msgSender(), _userId);
+        } else {
+            emit UserUpdated(_msgSender(), _userId);
+        }
     }
 
-    function createBallot(uint _id, uint _smtRoot, uint _startDate, uint _endDate) external {
+    function createBallot(uint _ballotId, uint _smtRoot, uint _startDate, uint _endDate) external {
         require(users[_msgSender()] != 0, "you-are-not-user");
 
-        ballots[_id].admin = _msgSender();
-        ballots[_id].smtRoot = _smtRoot;
-        ballots[_id].startDate = _startDate;
-        ballots[_id].endDate = _endDate;
+        ballots[_ballotId].admin = _msgSender();
+        ballots[_ballotId].smtRoot = _smtRoot;
+        ballots[_ballotId].startDate = _startDate;
+        ballots[_ballotId].endDate = _endDate;
 
-        emit BallotCreated(_id);
+        emit BallotCreated(_ballotId);
     }
 
     function vote(uint[2] calldata _a, uint[2][2] calldata _b, uint[2] calldata _c, uint[4] calldata _input) external {
