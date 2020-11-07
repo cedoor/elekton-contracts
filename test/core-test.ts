@@ -15,7 +15,7 @@ describe("Core tests", function () {
 		it(`An user with id = 0 should not add himself`, async function () {
 			const elektonUser = elekton.connect(accounts[1].signer)
 
-			await expect(elektonUser.createUser(0)).to.be.revertedWith("user-id-cannot-be-0")
+			await expect(elektonUser.createUser(0)).to.be.revertedWith("E000")
 		})
 
 		for (let userId = 1; userId < 5; userId++) {
@@ -30,7 +30,7 @@ describe("Core tests", function () {
 		it(`User with id = 1 should not update his id to 1`, async function () {
 			const elektonUser = elekton.connect(accounts[1].signer)
 
-			await expect(elektonUser.createUser(1)).to.be.revertedWith("user-id-cannot-be-same")
+			await expect(elektonUser.createUser(1)).to.be.revertedWith("E001")
 		})
 
 		it(`User with id = 1 should update his id to 5`, async function () {
@@ -55,7 +55,7 @@ describe("Core tests", function () {
 			const elektonUser = elekton.connect(accounts[1].signer)
 			const ballotId = 12n
 			const smt = await getSmt(accounts.slice(1, 5).map((account) => account.voter.publicKey))
-			const startDate = Math.floor(Date.now() / 1000)
+			const startDate = Math.floor(Date.now() / 1000) + 10
 			const endDate = Math.floor(Date.now() / 1000) + 30
 
 			await expect(elektonUser.createBallot(ballotId, smt.root, startDate, endDate))
