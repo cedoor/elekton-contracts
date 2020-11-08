@@ -43,7 +43,7 @@ contract Elekton is Ownable, Verifier {
 
     function createBallot(uint _ballotId, uint _smtRoot, uint _startDate, uint _endDate) external {
         require(users[_msgSender()] != 0, "E100"); // User must exist.
-        require(_startDate > block.timestamp, "E101"); // Start date cannot be in the past.
+        require(_startDate >= block.timestamp, "E101"); // Start date cannot be in the past.
         require(_startDate + 10 seconds <= _endDate, "E102"); // Time interval is too short.
 
         ballots[_ballotId].admin = _msgSender();
