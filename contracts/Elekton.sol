@@ -42,9 +42,10 @@ contract Elekton is Ownable, Verifier {
     }
 
     function createBallot(uint _ballotId, uint _smtRoot, uint _startDate, uint _endDate) external {
-        require(users[_msgSender()] != 0, "E100"); // User must exist.
-        require(_startDate >= block.timestamp, "E101"); // Start date cannot be in the past.
-        require(_startDate + 10 seconds <= _endDate, "E102"); // Time interval is too short.
+        require(ballots[_ballotId].startDate == 0, "E100"); // Ballot id already exist.
+        require(users[_msgSender()] != 0, "E101"); // User must exist.
+        require(_startDate >= block.timestamp, "E102"); // Start date cannot be in the past.
+        require(_startDate + 10 seconds <= _endDate, "E103"); // Time interval is too short.
 
         ballots[_ballotId].admin = _msgSender();
         ballots[_ballotId].smtRoot = _smtRoot;
@@ -60,7 +61,7 @@ contract Elekton is Ownable, Verifier {
         require(block.timestamp < ballots[_input[2]].endDate, "E202"); // Invalid late vote.
         require(_input[0] == ballots[_input[2]].smtRoot, "E203"); // SMT root is wrong.
         require(!voteNullifier[_input[3]], "E204"); // User has already voted.
-        require(verifyProof(_a, _b, _c, _input), "E205]"); // Voting proof is wrong.
+        require(verifyProof(_a, _b, _c, _input), "E205"); // Voting proof is wrong.
 
         voteNullifier[_input[3]] = true;
         ballots[_input[2]].votes.push(_input[1]);
@@ -69,8 +70,8 @@ contract Elekton is Ownable, Verifier {
     }
 
     function publishPollKey(uint _ballotId, uint _pollKey) external {
-        require(ballots[_ballotId].admin == _msgSender(), "E103"); // User is not the ballot admin.
-        require(block.timestamp > ballots[_ballotId].endDate, "E104"); // Poll key can be published after ballot end date.
+        require(ballots[_ballotId].admin == _msgSender(), "E104"); // User is not the ballot admin.
+        require(block.timestamp > ballots[_ballotId].endDate, "E105"); // Poll key can be published after ballot end date.
 
         ballots[_ballotId].pollKey = _pollKey;
 
