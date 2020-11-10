@@ -80,7 +80,7 @@ describe("Core tests", function () {
 
 		it("User 1 should create ballot 1 with 4 voters (users 1, 2, 3, 4)", async function () {
 			const startDate = Math.floor(Date.now() / 1000) + 13
-			const endDate = Math.floor(Date.now() / 1000) + 60
+			const endDate = Math.floor(Date.now() / 1000) + 62
 
 			await expect(elektonUser1.createBallot(ballotId, smt.root, startDate, endDate))
 				.to.emit(elekton, "BallotCreated")
@@ -205,25 +205,25 @@ describe("Core tests", function () {
 	})
 
 	describe("#publishPollKey()", function () {
+		let ballotId: bigint
+		let pollKey: bigint
+
+		before(function () {
+			ballotId = 1n
+			pollKey = 122n
+		})
+
 		it("An user should not publish a poll key in a ballot of another user", async function () {
 			const elektonUser2 = elekton.connect(accounts[2].signer)
-			const ballotId = 1n
-			const pollKey = 122n
 
 			await expect(elektonUser2.publishPollKey(ballotId, pollKey)).to.be.revertedWith("E104")
 		})
 
 		it("User 1 should not publish the poll key before his ballot ends", async function () {
-			const ballotId = 1n
-			const pollKey = 122n
-
 			await expect(elektonUser1.publishPollKey(ballotId, pollKey)).to.be.revertedWith("E105")
 		})
 
 		it("User 1 should publish the poll key when his ballot ends", async function () {
-			const ballotId = 1n
-			const pollKey = 122n
-
 			await delay(5000)
 
 			await expect(elektonUser1.publishPollKey(ballotId, pollKey))
