@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.6.11;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Verifier.sol";
 
-contract Elekton is Ownable, Verifier {
+contract Elekton is Verifier {
 
     event UserCreated (address, uint);
     event UserUpdated (address, uint);
@@ -28,26 +26,26 @@ contract Elekton is Ownable, Verifier {
 
     function createUser(uint _userId) external {
         require(_userId != 0, "E000"); // User id must be different from 0.
-        require(users[_msgSender()] != _userId, "E001"); // New user id must be different from current id.
+        require(users[msg.sender] != _userId, "E001"); // New user id must be different from current id.
 
-        uint currentId = users[_msgSender()];
+        uint currentId = users[msg.sender];
 
-        users[_msgSender()] = _userId;
+        users[msg.sender] = _userId;
 
         if (currentId == 0) {
-            emit UserCreated(_msgSender(), _userId);
+            emit UserCreated(msg.sender, _userId);
         } else {
-            emit UserUpdated(_msgSender(), _userId);
+            emit UserUpdated(msg.sender, _userId);
         }
     }
 
     function createBallot(uint _ballotId, uint _smtRoot, uint _startDate, uint _endDate) external {
         require(ballots[_ballotId].startDate == 0, "E100"); // Ballot id already exist.
-        require(users[_msgSender()] != 0, "E101"); // User must exist.
+        require(users[msg.sender] != 0, "E101"); // User must exist.
         require(_startDate >= block.timestamp, "E102"); // Start date cannot be in the past.
         require(_startDate + 10 seconds <= _endDate, "E103"); // Time interval is too short.
 
-        ballots[_ballotId].admin = _msgSender();
+        ballots[_ballotId].admin = msg.sender;
         ballots[_ballotId].smtRoot = _smtRoot;
         ballots[_ballotId].startDate = _startDate;
         ballots[_ballotId].endDate = _endDate;
@@ -70,7 +68,7 @@ contract Elekton is Ownable, Verifier {
     }
 
     function publishPollKey(uint _ballotId, uint _pollKey) external {
-        require(ballots[_ballotId].admin == _msgSender(), "E104"); // User is not the ballot admin.
+        require(ballots[_ballotId].admin == msg.sender, "E104"); // User is not the ballot admin.
         require(block.timestamp > ballots[_ballotId].endDate, "E105"); // Poll key can be published after ballot end date.
 
         ballots[_ballotId].pollKey = _pollKey;
