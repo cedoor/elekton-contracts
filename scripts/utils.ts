@@ -48,10 +48,10 @@ export async function getSmt(publicKeys: any[]) {
 	return tree
 }
 
-export async function createElektonProof(publicKeys: any[], ballotAddress: BigInt, account: any, vote: BigInt) {
+export async function createElektonProof(publicKeys: any[], ballotId: BigInt, account: any, vote: BigInt) {
 	const ppk = processPrivateKey(account.privateKey)
 	const signature = eddsa.signPoseidon(account.privateKey, vote)
-	const nullifier = poseidon([ballotAddress, ppk])
+	const voteNullifier = poseidon([ballotId, ppk])
 	const tree = await getSmt(publicKeys)
 
 	const { siblings } = await tree.find(account.publicKey[0])
@@ -67,9 +67,9 @@ export async function createElektonProof(publicKeys: any[], ballotAddress: BigIn
 		S: signature.S,
 		smtSiblings: siblings,
 		smtRoot: tree.root,
-		encryptedVote: vote,
-		ballotAddress,
-		nullifier
+		vote,
+		ballotId,
+		voteNullifier
 	})
 }
 

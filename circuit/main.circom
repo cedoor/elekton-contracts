@@ -11,11 +11,9 @@ template Elekton (nLevels) {
     signal private input S;
     signal private input smtSiblings[nLevels];
     signal input smtRoot;
-    signal input encryptedVote;
-    signal input ballotAddress;
-    signal input nullifier;
-
-    var i;
+    signal input vote;
+    signal input ballotId;
+    signal input voteNullifier;
 
     component babyPbk = BabyPbk();
     babyPbk.in <== privateKey;
@@ -23,7 +21,7 @@ template Elekton (nLevels) {
     component smtVerifier = SMTVerifier(nLevels);
     smtVerifier.enabled <== 1;
     smtVerifier.root <== smtRoot
-    for (i = 0; i < nLevels; i++) smtVerifier.siblings[i] <== smtSiblings[i];
+    for (var i = 0; i < nLevels; i++) smtVerifier.siblings[i] <== smtSiblings[i];
     smtVerifier.oldKey <== 0;
     smtVerifier.oldValue <== 0;
     smtVerifier.isOld0 <== 0;
@@ -38,13 +36,13 @@ template Elekton (nLevels) {
     eddsaPoseidonVerifier.R8x <== R8x;
     eddsaPoseidonVerifier.R8y <== R8y;
     eddsaPoseidonVerifier.S <== S;
-    eddsaPoseidonVerifier.M <== encryptedVote;
+    eddsaPoseidonVerifier.M <== vote;
 
     component poseidon = Poseidon(2);
-    poseidon.inputs[0] <== ballotAddress;
+    poseidon.inputs[0] <== ballotId;
     poseidon.inputs[1] <== privateKey;
 
-    nullifier === poseidon.out;
+    voteNullifier === poseidon.out;
 }
 
 component main = Elekton(10);

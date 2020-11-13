@@ -96,7 +96,7 @@ describe("Core tests", function () {
 	})
 
 	describe("#vote()", function () {
-		it("An user should not vote for a non-existent ballot", async function () {
+		it("An user should not vote on a non-existent ballot", async function () {
 			const ballotId = 2n
 			const vote = 2n
 			const proof = await createElektonProof(
@@ -147,7 +147,7 @@ describe("Core tests", function () {
 			await expect(elekton.vote(...proof)).to.be.revertedWith("E202")
 		})
 
-		it("An user should not vote in ballot with a wrong smt root", async function () {
+		it("An user should not vote on ballot with a wrong smt root", async function () {
 			const ballotId = 1n
 			const vote = 2n
 			const proof = await createElektonProof(
@@ -161,7 +161,7 @@ describe("Core tests", function () {
 		})
 
 		for (let userId = 1; userId < 5; userId++) {
-			it(`User ${userId} should vote anonymously in ballot 1`, async function () {
+			it(`User ${userId} should vote anonymously on ballot 1`, async function () {
 				const ballotId = 1n
 				const vote = BigInt(userId % 2)
 				const proof = await createElektonProof(
@@ -204,31 +204,31 @@ describe("Core tests", function () {
 		})
 	})
 
-	describe("#publishPollKey()", function () {
+	describe("#publishDecryptionKey()", function () {
 		let ballotId: bigint
-		let pollKey: bigint
+		let decryptionKey: bigint
 
 		before(function () {
 			ballotId = 1n
-			pollKey = 122n
+			decryptionKey = 122n
 		})
 
-		it("An user should not publish a poll key in a ballot of another user", async function () {
+		it("An user should not publish a decryption key on a ballot of another user", async function () {
 			const elektonUser2 = elekton.connect(accounts[2].signer)
 
-			await expect(elektonUser2.publishPollKey(ballotId, pollKey)).to.be.revertedWith("E104")
+			await expect(elektonUser2.publishDecryptionKey(ballotId, decryptionKey)).to.be.revertedWith("E104")
 		})
 
-		it("User 1 should not publish the poll key before his ballot ends", async function () {
-			await expect(elektonUser1.publishPollKey(ballotId, pollKey)).to.be.revertedWith("E105")
+		it("User 1 should not publish the decryption key before his ballot ends", async function () {
+			await expect(elektonUser1.publishDecryptionKey(ballotId, decryptionKey)).to.be.revertedWith("E105")
 		})
 
-		it("User 1 should publish the poll key when his ballot ends", async function () {
+		it("User 1 should publish the decryption key when his ballot ends", async function () {
 			await delay(5000)
 
-			await expect(elektonUser1.publishPollKey(ballotId, pollKey))
-				.to.emit(elekton, "PollKeyPublished")
-				.withArgs(ballotId, pollKey)
+			await expect(elektonUser1.publishDecryptionKey(ballotId, decryptionKey))
+				.to.emit(elekton, "DecryptionKeyPublished")
+				.withArgs(ballotId, decryptionKey)
 		})
 	})
 })
