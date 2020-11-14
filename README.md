@@ -47,15 +47,15 @@ ___
 
 With the following installed packages:
 - git
-- node >= 12
-- npm >= 6
+- node
+- yarn
 
 Clone the repo and install the dependencies from npm.
 
 ```bash
 git clone https://github.com/elekton/contracts.git
 cd contracts
-npm i
+yarn
 ```
 
 ## :video_game: Usage
@@ -63,17 +63,17 @@ npm i
 Create the snark artifacts (takes a few minutes) and test with:
 
 ```
-npm run snark 
-npm run test
+yarn snark 
+yarn test
 ```
 
 If you want to interact with the contracts from the outside you can create a [hardhat node](https://hardhat.org/hardhat-network/)
 on `http://localhost:8545`, compile and deploy contracts with:
 
 ```
-npm start
-npm compile
-npm deploy
+yarn start
+yarn compile
+yarn deploy
 ```
 
 ## :telephone_receiver: Contacts
