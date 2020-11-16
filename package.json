@@ -51,7 +51,16 @@
 	},
 	"config": {
 		"solidity": {
-			"version": "0.6.11"
+			"version": "0.6.11",
+			"settings": {
+				"outputSelection": {
+					"contracts/Elekton.sol": {
+						"Elekton": [
+							"devdoc"
+						]
+					}
+				}
+			}
 		},
 		"paths": {
 			"contracts": "./contracts",

@@ -25,9 +25,7 @@ task("deploy", "Deploy a contract instance")
 
 // https://hardhat.org/config/
 const hardhatConfig: HardhatUserConfig = {
-	solidity: {
-		version: config.solidity.version
-	},
+	solidity: config.solidity,
 	paths: {
 		sources: config.paths.contracts,
 		tests: config.paths.tests,
