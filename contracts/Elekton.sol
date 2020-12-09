@@ -5,15 +5,15 @@ import "./Verifier.sol";
 
 /// @title Simple anonymous voting contract
 /// @author Omar Desogus
-/// @dev Elekton allows you to manage the users of the voting system, to
-/// create ballot, to vote anonymously and to publish the key to decrypt votes.
+/// @dev Elekton contract allows you to add users and allows these users to
+/// create ballots, vote anonymously and publish the key to decrypt votes.
 /// The votes may possibly also not be encrypted, and in this case the
 /// count can be calculated externally in real time.
-/// All data not necessary for the logic of the contract must be saved externally.
-/// The id parameter can be used for a reference to external data.
-/// For errors, codes are used, the first character `E` indicates that it is an error,
-/// the second digit indicates the scope (users = 0, ballot = 1, vote = 2),
-/// the last two a progressive id.
+/// All data not necessary for the logic of the contract must be saved externally,
+/// and the id parameter can be used as reference to external data.
+/// Contract error messages are represented by specific codes: a first character `E`
+/// followed by a digit for the scope (users = 0, ballot = 1, vote = 2),
+/// and by two digits with a progressive id.
 contract Elekton is Verifier {
 
     /// @dev Emitted when a user is created.
@@ -40,7 +40,7 @@ contract Elekton is Verifier {
     /// @param _decryptionKey: decryption key.
     event DecryptionKeyPublished (uint _ballotId, uint _decryptionKey);
 
-    // Ballot struct contains all the parameters needed to manage time, votes and voters.
+    // Ballot structure contains all the parameters needed to manage time, votes and voters.
     struct Ballot {
         address admin; // Address of the ballot creator.
         uint smtRoot; // Root of the census tree.
