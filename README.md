@@ -21,7 +21,7 @@
 
 ---
 
-## :paperclip: Table of Contents
+## Table of Contents
 
 -   🚀[Features](#features)
 -   🛠 [Install](#install)
