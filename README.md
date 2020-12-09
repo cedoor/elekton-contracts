@@ -1,6 +1,6 @@
 <p align="center">
     <h1 align="center">
-        <img width="40" src="https://github.com/elekton/elekton-dapp/raw/master/assets/images/icon.png">
+        <img width="40" src="https://github.com/elekton/elekton-dapp/raw/main/assets/images/icon.png">
         Elekton contracts
     </h1>
     <p align="center">Elekton Solidity smart contracts.</p>
@@ -10,7 +10,7 @@
     <a href="https://github.com/elekton" target="_blank">
         <img src="https://img.shields.io/badge/project-Elekton-blue.svg?style=flat-square">
     </a>
-    <a href="https://github.com/elekton/elekton-contracts/blob/master/LICENSE" target="_blank">
+    <a href="https://github.com/elekton/elekton-contracts/blob/main/LICENSE" target="_blank">
         <img src="https://img.shields.io/github/license/elekton/elekton-contracts.svg?style=flat-square">
     </a>
     <a href="https://prettier.io/" target="_blank">
@@ -30,7 +30,7 @@
     -   [Rules](#scroll-rules)
         -   [Commits](https://github.com/cedoor/cedoor/tree/main/git#commits-rules)
         -   [Branches](https://github.com/cedoor/cedoor/tree/main/git#branch-rules)
--   🧾 [MIT License](https://github.com/elekton/elekton-contracts/blob/master/LICENSE)
+-   🧾 [MIT License](https://github.com/elekton/elekton-contracts/blob/main/LICENSE)
 -   ☎️ [Contacts](#contacts)
     -   [Developers](#developers)
 
