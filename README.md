@@ -1,6 +1,6 @@
 <p align="center">
     <h1 align="center">
-        <img width="40" src="https://github.com/elekton/elekton-dapp/raw/main/assets/images/icon.png">
+        <img width="40" src="https://github.com/elekton/elekton-dapp/raw/master/assets/images/icon.png">
         Elekton contracts
     </h1>
     <p align="center">Elekton Solidity smart contracts.</p>
@@ -42,9 +42,9 @@
 
 | Feature           | Status | Description                                        |
 | ----------------- | :----: | -------------------------------------------------- |
-| User registration |   ✔️   | You can register on the system as an Elekton user. |
-| Ballot creation   |   ✔️   | All users can create ballots.                      |
-| Anonymous vote    |   ✔️   | Authorized users can cast their votes on ballots.  |
+| User registration |   ✔️    | Users can register themselves in the contract.     |
+| Ballot creation   |   ✔️    | All users can create ballots.                      |
+| Anonymous vote    |   ✔️    | Authorized users can cast their votes on ballots anonymously.  |
 
 ## Install
 
