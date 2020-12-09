@@ -14,7 +14,7 @@
         <img src="https://img.shields.io/github/license/elekton/elekton-contracts.svg?style=flat-square">
     </a>
     <a href="https://eslint.org/" target="_blank">
-        <img alt="Linter eslint" src="https://img.shields.io/badge/linter-eslint-blueviolet?style=flat-square&logo=eslint">
+        <img alt="Linter eslint" src="https://img.shields.io/badge/linter-eslint-8080f2?style=flat-square&logo=eslint">
     </a>
     <a href="https://prettier.io/" target="_blank">
         <img alt="Code style prettier" src="https://img.shields.io/badge/code%20style-prettier-f8bc45?style=flat-square&logo=prettier">
