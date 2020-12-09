@@ -13,10 +13,14 @@
     <a href="https://github.com/elekton/elekton-contracts/blob/main/LICENSE" target="_blank">
         <img src="https://img.shields.io/github/license/elekton/elekton-contracts.svg?style=flat-square">
     </a>
+    <a href="https://eslint.org/" target="_blank">
+        <img alt="Linter eslint" src="https://img.shields.io/badge/linter-eslint-blueviolet?style=flat-square&logo=eslint">
+    </a>
     <a href="https://prettier.io/" target="_blank">
         <img alt="Code style prettier" src="https://img.shields.io/badge/code%20style-prettier-f8bc45?style=flat-square&logo=prettier">
     </a>
     <img alt="Repository top language" src="https://img.shields.io/github/languages/top/elekton/elekton-contracts?style=flat-square">
+
 </p>
 
 ---
@@ -36,11 +40,11 @@
 
 ## Features
 
-| Feature           |       Status       | Description                                         |
-| ----------------- | :----------------: | --------------------------------------------------- |
-| User registration | ✔️  | You can register on the system as an Elekton user. |
-| Ballot creation   | ✔️  | All users can create ballots.                       |
-| Anonymous vote    | ✔️  | Authorized users can cast their votes on ballots.   |
+| Feature           | Status | Description                                        |
+| ----------------- | :----: | -------------------------------------------------- |
+| User registration |   ✔️   | You can register on the system as an Elekton user. |
+| Ballot creation   |   ✔️   | All users can create ballots.                      |
+| Anonymous vote    |   ✔️   | Authorized users can cast their votes on ballots.  |
 
 ## Install
 
