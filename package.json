@@ -23,11 +23,11 @@
     "scripts": {
         "start": "hardhat node",
         "compile": "hardhat compile",
-        "deploy": "hardhat deploy",
         "clean": "hardhat clean",
+        "test": "hardhat test",
+        "deploy:localhost": "hardhat --network localhost deploy",
         "snark": "ts-node scripts/create-snark-artifacts.ts",
         "lint": "solhint contracts/**/*.sol",
-        "test": "hardhat test",
         "commit": "git-cz",
         "precommit": "lint-staged"
     },
