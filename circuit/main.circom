@@ -12,7 +12,7 @@ template Elekton (nLevels) {
     signal private input smtSiblings[nLevels];
     signal input smtRoot;
     signal input vote;
-    signal input ballotId;
+    signal input ballotIndex;
     signal input voteNullifier;
 
     component babyPbk = BabyPbk();
@@ -39,7 +39,7 @@ template Elekton (nLevels) {
     eddsaPoseidonVerifier.M <== vote;
 
     component poseidon = Poseidon(2);
-    poseidon.inputs[0] <== ballotId;
+    poseidon.inputs[0] <== ballotIndex;
     poseidon.inputs[1] <== privateKey;
 
     voteNullifier === poseidon.out;

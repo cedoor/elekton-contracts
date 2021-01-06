@@ -10,7 +10,7 @@ import "./Verifier.sol";
 /// The votes may possibly also not be encrypted, and in this case the
 /// count can be calculated externally in real time.
 /// All data not necessary for the logic of the contract must be saved externally,
-/// and the id parameter can be used as reference to external data.
+/// and a reference is saved in this contract.
 /// Contract error messages are represented by specific codes: a first character `E`
 /// followed by a digit for the scope (users = 0, ballot = 1, vote = 2),
 /// and by two digits with a progressive id.
@@ -18,30 +18,31 @@ contract Elekton is Verifier {
 
     /// @dev Emitted when a user is created.
     /// @param _address: user address.
-    /// @param _userId: user id.
-    event UserCreated (address _address, uint _userId);
+    /// @param _data: user data reference.
+    event UserCreated (address _address, bytes32 _data);
 
-    /// @dev Emitted when the user id is updated.
+    /// @dev Emitted when the user data is updated.
     /// @param _address: user address.
-    /// @param _userId: new user id.
-    event UserUpdated (address _address, uint _userId);
+    /// @param _data: new user data reference.
+    event UserUpdated (address _address, bytes32 _data);
 
     /// @dev Emitted when a ballot is created.
-    /// @param _ballotId: ballot id.
-    event BallotCreated (uint _ballotId);
+    /// @param _index: ballot index.
+    event BallotCreated (uint _index);
 
     /// @dev Emitted when a user votes on a ballot.
-    /// @param _ballotId: ballot id.
+    /// @param _index: ballot index.
     /// @param _vote: user vote (encrypted or not).
-    event VoteAdded (uint indexed _ballotId, uint _vote);
+    event VoteAdded (uint indexed _index, uint _vote);
 
     /// @dev Emitted when a decryption key is published.
-    /// @param _ballotId: ballot id.
+    /// @param _index: ballot index.
     /// @param _decryptionKey: decryption key.
-    event DecryptionKeyPublished (uint _ballotId, uint _decryptionKey);
+    event DecryptionKeyPublished (uint _index, uint _decryptionKey);
 
     // Ballot structure contains all the parameters needed to manage time, votes and voters.
     struct Ballot {
+        bytes32 data; // External data reference.
         address admin; // Address of the ballot creator.
         uint smtRoot; // Root of the census tree.
         uint startDate; // Ballot start timestamp.
@@ -50,54 +51,57 @@ contract Elekton is Verifier {
         uint decryptionKey; // Key to decrypt the votes.
     }
 
-    /// @dev Gets an user address and returns his id.
-    /// @return user id.
-    mapping(address => uint) public users;
+    /// @dev Gets an user address and returns his data reference.
+    /// @return user data reference.
+    mapping(address => bytes32) public users;
 
-    /// @dev Gets a ballot id and returns its data.
-    /// @return ballot data.
-    mapping(uint => Ballot) public ballots;
+    /// @dev Gets a ballot index and returns the ballot.
+    /// @return ballot.
+    Ballot[] public ballots;
 
     /// @dev Gets the vote nullifier and returns a bool.
-    /// Nullifier is a Poseidon hash of the ballot id and the voter private key.
+    /// Nullifier is a Poseidon hash of the ballot index and the voter private key.
     /// This mapping is useful for preventing a voter from voting twice.
     mapping(uint => bool) voteNullifier;
 
-    /// @dev Creates a user saving his id in the `users` mapping, or, if
-    /// the user already exists, updates his old id.
-    /// @param _userId: user id.
-    function createUser(uint _userId) external {
-        require(_userId != 0, "E000"); // User id must be different from 0.
-        require(users[msg.sender] != _userId, "E001"); // New user id must be different from current id.
+    /// @dev Creates a user saving his data reference in the `users` mapping, or, if
+    /// the user already exists, updates his old data reference.
+    /// @param _data: user data reference.
+    function createUser(bytes32 _data) external {
+        require(users[msg.sender] != _data, "E000"); // New user data must be different from the current data.
 
-        uint currentId = users[msg.sender];
+        uint currentData = uint(users[msg.sender]);
 
-        users[msg.sender] = _userId;
+        users[msg.sender] = _data;
 
-        if (currentId == 0) {
-            emit UserCreated(msg.sender, _userId);
+        if (currentData == 0) {
+            emit UserCreated(msg.sender, _data);
         } else {
-            emit UserUpdated(msg.sender, _userId);
+            emit UserUpdated(msg.sender, _data);
         }
     }
 
     /// @dev Creates a ballot saving its data in the `ballots` mapping.
-    /// @param _ballotId: ballot id.
+    /// @param _data: ballot data reference.
     /// @param _smtRoot: root of the census tree.
     /// @param _startDate: ballot start timestamp.
     /// @param _endDate: ballot end timestamp.
-    function createBallot(uint _ballotId, uint _smtRoot, uint _startDate, uint _endDate) external {
-        require(ballots[_ballotId].startDate == 0, "E100"); // Ballot id already exist.
-        require(users[msg.sender] != 0, "E101"); // User must exist.
-        require(_startDate >= block.timestamp, "E102"); // Start date cannot be in the past.
-        require(_startDate + 10 seconds <= _endDate, "E103"); // Time interval is too short.
+    function createBallot(bytes32 _data, uint _smtRoot, uint _startDate, uint _endDate) external {
+        require(users[msg.sender] != 0, "E100"); // User must exist.
+        require(_startDate >= block.timestamp, "E101"); // Start date cannot be in the past.
+        require(_startDate + 10 seconds <= _endDate, "E102"); // Time interval is too short.
 
-        ballots[_ballotId].admin = msg.sender;
-        ballots[_ballotId].smtRoot = _smtRoot;
-        ballots[_ballotId].startDate = _startDate;
-        ballots[_ballotId].endDate = _endDate;
+        Ballot memory ballot;
 
-        emit BallotCreated(_ballotId);
+        ballot.data = _data;
+        ballot.admin = msg.sender;
+        ballot.smtRoot = _smtRoot;
+        ballot.startDate = _startDate;
+        ballot.endDate = _endDate;
+
+        ballots.push(ballot);
+
+        emit BallotCreated(ballots.length - 1);
     }
 
     /// @dev Adds a vote on the ballot, verifying the zk-snark proof that the user
@@ -107,7 +111,7 @@ contract Elekton is Verifier {
     /// @param _c: proof parameter.
     /// @param _input: array of public proof parameters, in order: smtRoot, vote, ballotId, voteNullifier.
     function vote(uint[2] calldata _a, uint[2][2] calldata _b, uint[2] calldata _c, uint[4] calldata _input) external {
-        require(ballots[_input[2]].admin!= address(0), "E200"); // Ballot id is wrong.
+        require(_input[2] < ballots.length, "E200"); // Ballot index is wrong.
         require(block.timestamp > ballots[_input[2]].startDate, "E201"); // Invalid vote in advance.
         require(block.timestamp < ballots[_input[2]].endDate, "E202"); // Invalid late vote.
         require(_input[0] == ballots[_input[2]].smtRoot, "E203"); // SMT root is wrong.
@@ -121,15 +125,15 @@ contract Elekton is Verifier {
     }
 
     /// @dev Publishes the key to decrypt the votes of a ballot.
-    /// @param _ballotId: ballot id.
+    /// @param _ballotIndex: ballot index.
     /// @param _decryptionKey: decryption key.
-    function publishDecryptionKey(uint _ballotId, uint _decryptionKey) external {
-        require(ballots[_ballotId].admin == msg.sender, "E104"); // User is not the ballot admin.
-        require(block.timestamp > ballots[_ballotId].endDate, "E105"); // Decryption key can be published after ballot end date.
+    function publishDecryptionKey(uint _ballotIndex, uint _decryptionKey) external {
+        require(ballots[_ballotIndex].admin == msg.sender, "E104"); // User is not the ballot admin.
+        require(block.timestamp > ballots[_ballotIndex].endDate, "E105"); // Decryption key can be published after ballot end date.
 
-        ballots[_ballotId].decryptionKey = _decryptionKey;
+        ballots[_ballotIndex].decryptionKey = _decryptionKey;
 
-        emit DecryptionKeyPublished(_ballotId, _decryptionKey);
+        emit DecryptionKeyPublished(_ballotIndex, _decryptionKey);
     }
 
 }

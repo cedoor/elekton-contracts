@@ -1,7 +1,7 @@
 import createBlakeHash from "blake-hash"
 import { eddsa, poseidon, smt } from "circomlib"
 import crypto from "crypto"
-import { Contract } from "ethers"
+import { Contract, providers } from "ethers"
 import { Scalar, utils } from "ffjavascript"
 import { ethers } from "hardhat"
 import { groth16 } from "snarkjs"
@@ -38,6 +38,13 @@ function createVoterAccount() {
     return { privateKey, publicKey }
 }
 
+export async function getLastBlockTimestamp(provider: providers.Provider): Promise<number> {
+    const blockNumber = await provider.getBlockNumber()
+    const { timestamp } = await provider.getBlock(blockNumber)
+
+    return timestamp
+}
+
 export async function getSmt(publicKeys: any[]) {
     const tree = await smt.newMemEmptyTrie()
 
@@ -56,10 +63,10 @@ export async function waitConfirmations(transactionPromise: Promise<any>, confir
     return transaction
 }
 
-export async function createElektonProof(publicKeys: any[], ballotId: BigInt, account: any, vote: BigInt) {
+export async function createElektonProof(publicKeys: any[], ballotIndex: BigInt, account: any, vote: BigInt) {
     const ppk = processPrivateKey(account.privateKey)
     const signature = eddsa.signPoseidon(account.privateKey, vote)
-    const voteNullifier = poseidon([ballotId, ppk])
+    const voteNullifier = poseidon([ballotIndex, ppk])
     const tree = await getSmt(publicKeys)
 
     const { siblings } = await tree.find(account.publicKey[0])
@@ -76,7 +83,7 @@ export async function createElektonProof(publicKeys: any[], ballotId: BigInt, ac
         smtSiblings: siblings,
         smtRoot: tree.root,
         vote,
-        ballotId,
+        ballotIndex,
         voteNullifier
     })
 }
