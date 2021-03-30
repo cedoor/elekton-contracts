@@ -1,16 +1,16 @@
 {
-	"ts-node": {
-		"files": true
-	},
-	"compilerOptions": {
-		"target": "es2020",
-		"module": "commonjs",
-		"strict": true,
-		"esModuleInterop": true,
-		"outDir": "dist",
-		"resolveJsonModule": true,
-		"typeRoots": ["./node_modules/@types", "./types"]
-	},
-	"include": ["./scripts", "./test", "./types"],
-	"files": ["./hardhat.config.ts"]
+    "ts-node": {
+        "files": true
+    },
+    "compilerOptions": {
+        "target": "es2020",
+        "module": "commonjs",
+        "strict": true,
+        "esModuleInterop": true,
+        "outDir": "dist",
+        "resolveJsonModule": true,
+        "typeRoots": ["./node_modules/@types", "./types"]
+    },
+    "include": ["./scripts", "./test", "./types"],
+    "files": ["./hardhat.config.ts"]
 }
