@@ -201,7 +201,7 @@ describe("Core tests", () => {
         })
 
         it("User 1 should publish the decryption key when his ballot ends", async () => {
-            await delay(5000)
+            await delay(6000)
 
             await expect(waitConfirmations(elektonUser1.publishDecryptionKey(ballotIndex, decryptionKey)))
                 .to.emit(elekton, "DecryptionKeyPublished")
