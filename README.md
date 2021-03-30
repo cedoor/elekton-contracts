@@ -1,17 +1,13 @@
 <p align="center">
     <h1 align="center">
-        <img width="40" src="https://github.com/elekton/elekton-dapp/raw/master/assets/images/icon.png">
         Elekton contracts
     </h1>
     <p align="center">Elekton Solidity smart contracts.</p>
 </p>
 
 <p align="center">
-    <a href="https://github.com/elekton" target="_blank">
-        <img src="https://img.shields.io/badge/project-Elekton-blue.svg?style=flat-square">
-    </a>
-    <a href="https://github.com/elekton/elekton-contracts/blob/main/LICENSE" target="_blank">
-        <img src="https://img.shields.io/github/license/elekton/elekton-contracts.svg?style=flat-square">
+    <a href="https://github.com/cedoor/elekton-contracts/blob/main/LICENSE" target="_blank">
+        <img src="https://img.shields.io/github/license/cedoor/elekton-contracts.svg?style=flat-square">
     </a>
     <a href="https://eslint.org/" target="_blank">
         <img alt="Linter eslint" src="https://img.shields.io/badge/linter-eslint-8080f2?style=flat-square&logo=eslint">
@@ -19,32 +15,30 @@
     <a href="https://prettier.io/" target="_blank">
         <img alt="Code style prettier" src="https://img.shields.io/badge/code%20style-prettier-f8bc45?style=flat-square&logo=prettier">
     </a>
-    <img alt="Repository top language" src="https://img.shields.io/github/languages/top/elekton/elekton-contracts?style=flat-square">
-
+    <img alt="Repository top language" src="https://img.shields.io/github/languages/top/cedoor/elekton-contracts?style=flat-square">
 </p>
+
+## Features
+
+| Feature           | Status | Description                                                   |
+| ----------------- | :----: | ------------------------------------------------------------- |
+| User registration |   ✔️   | Users can register themselves in the contract.                |
+| Ballot creation   |   ✔️   | All users can create ballots.                                 |
+| Anonymous vote    |   ✔️   | Authorized users can cast their votes on ballots anonymously. |
 
 ---
 
 ## Table of Contents
 
--   🚀[Features](#features)
 -   🛠 [Install](#install)
 -   🕹 [Usage](#usage)
--   🔬 [Development](#development)
-    -   [Rules](#scroll-rules)
+-   🔬 Development
+    -   Rules
         -   [Commits](https://github.com/cedoor/cedoor/tree/main/git#commits-rules)
         -   [Branches](https://github.com/cedoor/cedoor/tree/main/git#branch-rules)
--   🧾 [MIT License](https://github.com/elekton/elekton-contracts/blob/main/LICENSE)
+-   🧾 [MIT License](https://github.com/cedoor/elekton-contracts/blob/main/LICENSE)
 -   ☎️ [Contacts](#contacts)
     -   [Developers](#developers)
-
-## Features
-
-| Feature           | Status | Description                                        |
-| ----------------- | :----: | -------------------------------------------------- |
-| User registration |   ✔️    | Users can register themselves in the contract.     |
-| Ballot creation   |   ✔️    | All users can create ballots.                      |
-| Anonymous vote    |   ✔️    | Authorized users can cast their votes on ballots anonymously.  |
 
 ## Install
 
@@ -57,7 +51,7 @@ With the following installed packages:
 Clone the repo and install the dependencies from npm.
 
 ```bash
-git clone https://github.com/elekton/elekton-contracts.git
+git clone https://github.com/cedoor/elekton-contracts.git
 cd elekton-contracts
 yarn
 ```
