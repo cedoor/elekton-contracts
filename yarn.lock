@@ -30,6 +30,11 @@
     chalk "^2.0.0"
     js-tokens "^4.0.0"
 
+"@cedoor/smt@^0.1.6":
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/@cedoor/smt/-/smt-0.1.6.tgz#539f7cd1d8830b5b29924c5adf4be1466ee7aad7"
+  integrity sha512-t68anEToWsYgdNC25M6OJWaUr6NvmkfC6lj3hvgDLDDNLpcr4Yf4AoGXVXwZyYtKa6k6gWv8aA760jeIZuyZ7g==
+
 "@commitlint/cli@^12.0.1":
   version "12.0.1"
   resolved "https://registry.yarnpkg.com/@commitlint/cli/-/cli-12.0.1.tgz#8960e34e8f1aed8b2ea50f223ee817fdf2264ffb"

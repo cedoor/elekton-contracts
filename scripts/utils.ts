@@ -1,11 +1,13 @@
 import createBlakeHash from "blake-hash"
-import { eddsa, poseidon, smt } from "circomlib"
+import { eddsa, poseidon } from "circomlib"
+import { SMT } from "@cedoor/smt"
 import crypto from "crypto"
 import { Contract, providers } from "ethers"
 import { Scalar, utils } from "ffjavascript"
 import { ethers } from "hardhat"
 import { groth16 } from "snarkjs"
 import { config } from "../package.json"
+import { ChildNodes, Proof } from "@cedoor/smt/dist/types/smt"
 
 export function getProjectConfig() {
     return config
@@ -45,14 +47,25 @@ export async function getLastBlockTimestamp(provider: providers.Provider): Promi
     return timestamp
 }
 
-export async function getSmt(publicKeys: any[]) {
-    const tree = await smt.newMemEmptyTrie()
+function getTree(publicKeys: bigint[][]): SMT {
+    const hash = (childNodes: ChildNodes) => poseidon(childNodes)
+    const tree = new SMT(hash, true)
 
     for (const publicKey of publicKeys) {
-        await tree.insert(...publicKey)
+        tree.add(publicKey[0], publicKey[1])
     }
 
     return tree
+}
+
+function getTreeProof(publicKeys: any[], publicKey: any): Proof {
+    const tree = getTree(publicKeys)
+
+    return tree.createProof(publicKey[0])
+}
+
+export function getTreeRoot(publicKeys: any[]): bigint {
+    return getTree(publicKeys).root as bigint
 }
 
 export async function waitConfirmations(transactionPromise: Promise<any>, confirmations = 1): Promise<any> {
@@ -63,16 +76,14 @@ export async function waitConfirmations(transactionPromise: Promise<any>, confir
     return transaction
 }
 
-export async function createElektonProof(publicKeys: any[], ballotIndex: BigInt, account: any, vote: BigInt) {
+export async function createElektonProof(publicKeys: any[], ballotIndex: bigint, account: any, vote: bigint) {
     const ppk = processPrivateKey(account.privateKey)
     const signature = eddsa.signPoseidon(account.privateKey, vote)
     const voteNullifier = poseidon([ballotIndex, ppk])
-    const tree = await getSmt(publicKeys)
+    const { root, sidenodes } = getTreeProof(publicKeys, account.publicKey)
 
-    const { siblings } = await tree.find(account.publicKey[0])
-
-    while (siblings.length < 10) {
-        siblings.push(0n)
+    while (sidenodes.length < 10) {
+        sidenodes.push(0n)
     }
 
     return getProofParameters({
@@ -80,8 +91,8 @@ export async function createElektonProof(publicKeys: any[], ballotIndex: BigInt,
         R8x: signature.R8[0],
         R8y: signature.R8[1],
         S: signature.S,
-        smtSiblings: siblings,
-        smtRoot: tree.root,
+        smtSiblings: sidenodes,
+        smtRoot: root,
         vote,
         ballotIndex,
         voteNullifier
@@ -106,7 +117,7 @@ async function getProofParameters(input: any) {
     ]
 }
 
-function processPrivateKey(privateKey: BigInt) {
+function processPrivateKey(privateKey: bigint) {
     const blakeHash = createBlakeHash("blake512").update(privateKey).digest()
     const sBuff = eddsa.pruneBuffer(blakeHash.slice(0, 32))
     const s = utils.leBuff2int(sBuff)

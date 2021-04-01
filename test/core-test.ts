@@ -6,7 +6,7 @@ import {
     deployContract,
     getAccounts,
     getLastBlockTimestamp,
-    getSmt,
+    getTreeRoot,
     stringToBytes32,
     waitConfirmations
 } from "../scripts/utils"
@@ -59,11 +59,11 @@ describe("Core tests", () => {
 
     describe("#createBallot()", () => {
         let ballotData: string
-        let smt: any
+        let treeRoot: bigint
 
         before(async () => {
             ballotData = stringToBytes32("data") as string
-            smt = await getSmt(accounts.slice(1, 5).map((account) => account.voter.publicKey))
+            treeRoot = getTreeRoot(accounts.slice(1, 5).map((account) => account.voter.publicKey))
         })
 
         it("An unregistered user should not create a ballot", async () => {
@@ -71,7 +71,7 @@ describe("Core tests", () => {
             const startDate = timestamp + 2
             const endDate = timestamp + 12
 
-            await expect(elekton.createBallot(ballotData, smt.root, startDate, endDate)).to.be.revertedWith("E100")
+            await expect(elekton.createBallot(ballotData, treeRoot, startDate, endDate)).to.be.revertedWith("E100")
         })
 
         it("A ballot should not start in the past", async () => {
@@ -79,7 +79,7 @@ describe("Core tests", () => {
             const startDate = timestamp - 2
             const endDate = timestamp + 10
 
-            await expect(elektonUser1.createBallot(ballotData, smt.root, startDate, endDate)).to.be.revertedWith("E101")
+            await expect(elektonUser1.createBallot(ballotData, treeRoot, startDate, endDate)).to.be.revertedWith("E101")
         })
 
         it("A ballot should not last less than 10 seconds", async () => {
@@ -87,7 +87,7 @@ describe("Core tests", () => {
             const startDate = timestamp + 2
             const endDate = timestamp + 10
 
-            await expect(elektonUser1.createBallot(ballotData, smt.root, startDate, endDate)).to.be.revertedWith("E102")
+            await expect(elektonUser1.createBallot(ballotData, treeRoot, startDate, endDate)).to.be.revertedWith("E102")
         })
 
         it("User 1 should create ballot 0 with 4 voters (users 1, 2, 3, 4)", async () => {
@@ -95,7 +95,7 @@ describe("Core tests", () => {
             const startDate = timestamp + 2
             const endDate = timestamp + 54
 
-            await expect(waitConfirmations(elektonUser1.createBallot(ballotData, smt.root, startDate, endDate)))
+            await expect(waitConfirmations(elektonUser1.createBallot(ballotData, treeRoot, startDate, endDate)))
                 .to.emit(elekton, "BallotCreated")
                 .withArgs(0)
         })
@@ -104,13 +104,13 @@ describe("Core tests", () => {
     describe("#vote()", () => {
         let ballotData: string
         let voterPublicKeys: any
-        let smt: any
-        let vote: BigInt
+        let treeRoot: bigint
+        let vote: bigint
 
         before(async () => {
             ballotData = stringToBytes32("data") as string
             voterPublicKeys = accounts.slice(1, 5).map((account) => account.voter.publicKey)
-            smt = await getSmt(voterPublicKeys)
+            treeRoot = getTreeRoot(voterPublicKeys)
             vote = 2n
         })
 
@@ -128,7 +128,7 @@ describe("Core tests", () => {
             const endDate = timestamp + 1000
             const proof = await createElektonProof(voterPublicKeys, ballotIndex, accounts[1].voter, vote)
 
-            await waitConfirmations(elektonUser1.createBallot(ballotData, smt.root, startDate, endDate))
+            await waitConfirmations(elektonUser1.createBallot(ballotData, treeRoot, startDate, endDate))
 
             await expect(elekton.vote(...proof)).to.be.revertedWith("E201")
         })
@@ -140,7 +140,7 @@ describe("Core tests", () => {
             const endDate = timestamp + 14
             const proof = await createElektonProof(voterPublicKeys, ballotIndex, accounts[1].voter, vote)
 
-            await waitConfirmations(elektonUser1.createBallot(ballotData, smt.root, startDate, endDate))
+            await waitConfirmations(elektonUser1.createBallot(ballotData, treeRoot, startDate, endDate))
 
             await delay(14000)
 
