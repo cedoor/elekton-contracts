@@ -38,7 +38,7 @@ contract Elekton is Verifier {
     /// @dev Emitted when a decryption key is published.
     /// @param _index: ballot index.
     /// @param _decryptionKey: decryption key.
-    event DecryptionKeyPublished (uint _index, uint _decryptionKey);
+    event DecryptionKeyPublished (uint indexed _index, uint _decryptionKey);
 
     // Ballot structure contains all the parameters needed to manage time, votes and voters.
     struct Ballot {
