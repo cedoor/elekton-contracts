@@ -89,7 +89,7 @@ contract Elekton is Verifier {
     function createBallot(bytes32 _data, uint _smtRoot, uint _startDate, uint _endDate) external {
         require(users[msg.sender] != 0, "E100"); // User must exist.
         require(_startDate >= block.timestamp, "E101"); // Start date cannot be in the past.
-        require(_startDate + 10 seconds <= _endDate, "E102"); // Time interval is too short.
+        require(_startDate < _endDate, "E102"); // Start date must be after end date.
 
         Ballot memory ballot;
 
