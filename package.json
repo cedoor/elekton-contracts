@@ -21,11 +21,11 @@
         "README.md"
     ],
     "scripts": {
-        "start": "hardhat node",
+        "start": "besu --config-file=besu.config.toml",
         "compile": "hardhat compile",
         "clean": "hardhat clean",
         "test": "hardhat test",
-        "deploy:localhost": "hardhat --network localhost deploy",
+        "deploy": "hardhat deploy",
         "snark": "ts-node scripts/create-snark-artifacts.ts",
         "lint": "solhint contracts/**/*.sol",
         "commit": "git-cz",

@@ -1,10 +1,10 @@
 import { expect } from "chai"
-import { Contract } from "ethers"
+import { Contract, Wallet } from "ethers"
 import {
     createElektonProof,
     delay,
     deployContract,
-    getAccounts,
+    createAccounts,
     getLastBlockTimestamp,
     getTreeRoot,
     stringToBytes32,
@@ -13,28 +13,28 @@ import {
 
 describe("Core tests", () => {
     let elekton: Contract
-    let accounts: any[]
+    let accounts: { wallet: Wallet; voter: any }[]
     let elektonUser1: Contract
 
     before(async () => {
-        elekton = await deployContract("Elekton")
-        accounts = await getAccounts()
-        elektonUser1 = elekton.connect(accounts[1].signer)
+        accounts = await createAccounts()
+        elekton = await deployContract("Elekton", accounts[0].wallet)
+        elektonUser1 = elekton.connect(accounts[1].wallet)
     })
 
     describe("#createUser()", () => {
         let user1Address: string
 
         before(async () => {
-            user1Address = await accounts[1].signer.getAddress()
+            user1Address = await accounts[1].wallet.getAddress()
         })
 
         for (let i = 1; i < 5; i++) {
             const data = stringToBytes32(i.toString())
 
             it(`User ${i} should add himself`, async () => {
-                const elektonUser = elekton.connect(accounts[i].signer)
-                const address = await accounts[i].signer.getAddress()
+                const elektonUser = elekton.connect(accounts[i].wallet)
+                const address = await accounts[i].wallet.getAddress()
 
                 await expect(waitConfirmations(elektonUser.createUser(data)))
                     .to.emit(elekton, "UserCreated")
@@ -45,7 +45,7 @@ describe("Core tests", () => {
         it(`User 1 should not update his data with the same reference`, async () => {
             const data = stringToBytes32("1")
 
-            await expect(elektonUser1.createUser(data)).to.be.revertedWith("E000")
+            await expect(waitConfirmations(elektonUser1.createUser(data))).to.be.reverted
         })
 
         it(`User 1 should update his data with another reference`, async () => {
@@ -71,29 +71,32 @@ describe("Core tests", () => {
             const startDate = timestamp + 2
             const endDate = timestamp + 12
 
-            await expect(elekton.createBallot(ballotData, treeRoot, startDate, endDate)).to.be.revertedWith("E100")
+            await expect(waitConfirmations(elekton.createBallot(ballotData, treeRoot, startDate, endDate))).to.be
+                .reverted
         })
 
         it("A ballot should not start in the past", async () => {
             const timestamp = await getLastBlockTimestamp(elekton.provider)
             const startDate = timestamp - 2
-            const endDate = timestamp + 10
+            const endDate = timestamp + 2
 
-            await expect(elektonUser1.createBallot(ballotData, treeRoot, startDate, endDate)).to.be.revertedWith("E101")
+            await expect(waitConfirmations(elektonUser1.createBallot(ballotData, treeRoot, startDate, endDate))).to.be
+                .reverted
         })
 
-        it("A ballot should not last less than 10 seconds", async () => {
+        it("A ballot start date should not be less than its end date", async () => {
             const timestamp = await getLastBlockTimestamp(elekton.provider)
             const startDate = timestamp + 2
-            const endDate = timestamp + 10
+            const endDate = timestamp + 1
 
-            await expect(elektonUser1.createBallot(ballotData, treeRoot, startDate, endDate)).to.be.revertedWith("E102")
+            await expect(waitConfirmations(elektonUser1.createBallot(ballotData, treeRoot, startDate, endDate))).to.be
+                .reverted
         })
 
         it("User 1 should create ballot 0 with 4 voters (users 1, 2, 3, 4)", async () => {
             const timestamp = await getLastBlockTimestamp(elekton.provider)
-            const startDate = timestamp + 2
-            const endDate = timestamp + 54
+            const startDate = timestamp + 5
+            const endDate = timestamp + 100
 
             await expect(waitConfirmations(elektonUser1.createBallot(ballotData, treeRoot, startDate, endDate)))
                 .to.emit(elekton, "BallotCreated")
@@ -118,7 +121,7 @@ describe("Core tests", () => {
             const ballotIndex = 1n
             const proof = await createElektonProof(voterPublicKeys, ballotIndex, accounts[1].voter, vote)
 
-            await expect(elekton.vote(...proof)).to.be.revertedWith("E200")
+            await expect(waitConfirmations(elekton.vote(...proof))).to.be.reverted
         })
 
         it("An user should not vote in advance", async () => {
@@ -130,21 +133,21 @@ describe("Core tests", () => {
 
             await waitConfirmations(elektonUser1.createBallot(ballotData, treeRoot, startDate, endDate))
 
-            await expect(elekton.vote(...proof)).to.be.revertedWith("E201")
+            await expect(waitConfirmations(elekton.vote(...proof))).to.be.reverted
         })
 
         it("An user should not vote late", async () => {
             const ballotIndex = 2n
             const timestamp = await getLastBlockTimestamp(elekton.provider)
-            const startDate = timestamp + 4
-            const endDate = timestamp + 14
+            const startDate = timestamp + 5
+            const endDate = timestamp + 6
             const proof = await createElektonProof(voterPublicKeys, ballotIndex, accounts[1].voter, vote)
 
             await waitConfirmations(elektonUser1.createBallot(ballotData, treeRoot, startDate, endDate))
 
-            await delay(14000)
+            await delay(6000)
 
-            await expect(elekton.vote(...proof)).to.be.revertedWith("E202")
+            await expect(waitConfirmations(elekton.vote(...proof))).to.be.reverted
         })
 
         it("An user should not vote on ballot with a wrong smt root", async () => {
@@ -152,7 +155,7 @@ describe("Core tests", () => {
             const wrongVoterPublicKeys = accounts.slice(1, 6).map((account) => account.voter.publicKey)
             const proof = await createElektonProof(wrongVoterPublicKeys, ballotIndex, accounts[1].voter, vote)
 
-            await expect(elekton.vote(...proof)).to.be.revertedWith("E203")
+            await expect(waitConfirmations(elekton.vote(...proof))).to.be.reverted
         })
 
         for (let i = 1; i < 5; i++) {
@@ -170,14 +173,14 @@ describe("Core tests", () => {
             const ballotIndex = 0n
             const proof = await createElektonProof(voterPublicKeys, ballotIndex, accounts[1].voter, vote)
 
-            await expect(elekton.vote(...proof)).to.be.revertedWith("E204")
+            await expect(waitConfirmations(elekton.vote(...proof))).to.be.reverted
         })
 
         it("An user should not vote with a invalid proof", async () => {
             const ballotIndex = 0n
             const proof = await createElektonProof(voterPublicKeys, ballotIndex, accounts[0].voter, vote)
 
-            await expect(elekton.vote(...proof)).to.be.revertedWith("E205")
+            await expect(waitConfirmations(elekton.vote(...proof))).to.be.reverted
         })
     })
 
@@ -191,13 +194,15 @@ describe("Core tests", () => {
         })
 
         it("An user should not publish a decryption key on a ballot of another user", async () => {
-            const elektonUser2 = elekton.connect(accounts[2].signer)
+            const elektonUser2 = elekton.connect(accounts[2].wallet)
 
-            await expect(elektonUser2.publishDecryptionKey(ballotIndex, decryptionKey)).to.be.revertedWith("E104")
+            await expect(waitConfirmations(elektonUser2.publishDecryptionKey(ballotIndex, decryptionKey))).to.be
+                .reverted
         })
 
         it("User 1 should not publish the decryption key before his ballot ends", async () => {
-            await expect(elektonUser1.publishDecryptionKey(ballotIndex, decryptionKey)).to.be.revertedWith("E105")
+            await expect(waitConfirmations(elektonUser1.publishDecryptionKey(ballotIndex, decryptionKey))).to.be
+                .reverted
         })
 
         it("User 1 should publish the decryption key when his ballot ends", async () => {

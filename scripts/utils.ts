@@ -2,7 +2,7 @@ import createBlakeHash from "blake-hash"
 import { eddsa, poseidon } from "circomlib"
 import { SMT } from "@cedoor/smt"
 import crypto from "crypto"
-import { Contract, providers } from "ethers"
+import { Contract, providers, Wallet } from "ethers"
 import { Scalar, utils } from "ffjavascript"
 import { ethers } from "hardhat"
 import { groth16 } from "snarkjs"
@@ -13,21 +13,14 @@ export function getProjectConfig() {
     return config
 }
 
-export async function getAccounts() {
-    const signers = await ethers.getSigners()
-    const voters = createVoterAccounts(signers.length)
-
-    return signers.map((signer, i) => ({
-        signer,
-        voter: voters[i]
-    }))
-}
-
-function createVoterAccounts(n: number) {
+export async function createAccounts(n = 10) {
     const accounts = []
 
     for (let i = 0; i < n; i++) {
-        accounts.push(createVoterAccount())
+        accounts.push({
+            wallet: ethers.Wallet.createRandom().connect(ethers.provider),
+            voter: createVoterAccount()
+        })
     }
 
     return accounts
@@ -135,9 +128,9 @@ function padNumberAs64Hex(n: any) {
     return `0x${hex}`
 }
 
-export async function deployContract(contractName: string): Promise<Contract> {
+export async function deployContract(contractName: string, wallet: Wallet): Promise<Contract> {
     const ContractFactory = await ethers.getContractFactory(contractName)
-    const instance = await ContractFactory.deploy()
+    const instance = await ContractFactory.connect(wallet).deploy()
 
     await instance.deployed()
 

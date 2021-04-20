@@ -30,16 +30,15 @@ const hardhatConfig: HardhatUserConfig = {
         cache: config.paths.cache,
         artifacts: config.paths.build.contracts
     },
+    defaultNetwork: "besu",
     networks: {
         besu: {
-            url: "http://151.56.86.147:18545",
-            accounts: [
-                "e227d26044b03bdb29ef637638a4a153cd6afb6572753d3ba4dbb3367bb6ebba",
-                "1a0bb26879365926c14777a58dcc259e241a71c2546f7eb86f723e1cdf683d73",
-                "2a8664ee7022cf75e2cfa04636fe77fc45b735d9ff9d7c514f8ae75114fe0ee6",
-                "f6eb9c7034b57fb692e2c1f4177fc01b28eea9e6e5e32ae64d0f62f3937623ad",
-                "ec5a056be5c22f3ef4d1bfa02371dcc0cf1394f9ea4b5ce8e9c4f5bc1f0d7704"
-            ]
+            url: "http://127.0.0.1:8545",
+            gasPrice: 0,
+            gas: 112450000,
+            accounts: {
+                mnemonic: "test test test test test test test test test test test junk"
+            }
         }
     }
 }
