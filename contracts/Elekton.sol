@@ -62,7 +62,7 @@ contract Elekton is Verifier {
     /// @dev Gets the vote nullifier and returns a bool.
     /// Nullifier is a Poseidon hash of the ballot index and the voter private key.
     /// This mapping is useful for preventing a voter from voting twice.
-    mapping(uint => bool) voteNullifier;
+    mapping(uint => bool) public voteNullifier;
 
     /// @dev Creates a user saving his data reference in the `users` mapping, or, if
     /// the user already exists, updates his old data reference.
