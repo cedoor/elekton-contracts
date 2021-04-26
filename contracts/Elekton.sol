@@ -47,8 +47,6 @@ contract Elekton is Verifier {
         uint smtRoot; // Root of the census tree.
         uint startDate; // Ballot start timestamp.
         uint endDate; // Ballot end timestamp.
-        uint[] votes; // List of votes (encrypted or not).
-        uint decryptionKey; // Key to decrypt the votes.
     }
 
     /// @dev Gets an user address and returns his data reference.
@@ -119,7 +117,6 @@ contract Elekton is Verifier {
         require(verifyProof(_a, _b, _c, _input), "E205"); // Voting proof is wrong.
 
         voteNullifier[_input[3]] = true;
-        ballots[_input[2]].votes.push(_input[1]);
 
         emit VoteAdded(_input[2], _input[1]);
     }
@@ -130,8 +127,6 @@ contract Elekton is Verifier {
     function publishDecryptionKey(uint _ballotIndex, uint _decryptionKey) external {
         require(ballots[_ballotIndex].admin == msg.sender, "E104"); // User is not the ballot admin.
         require(block.timestamp > ballots[_ballotIndex].endDate, "E105"); // Decryption key can be published after ballot end date.
-
-        ballots[_ballotIndex].decryptionKey = _decryptionKey;
 
         emit DecryptionKeyPublished(_ballotIndex, _decryptionKey);
     }
