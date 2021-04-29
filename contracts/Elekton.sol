@@ -8,19 +8,16 @@ import "./Verifier.sol";
 /// @dev Elekton contract allows you to add users and allows these users to
 /// create ballots, vote anonymously and publish the key to decrypt votes.
 /// The votes may possibly also not be encrypted, and in this case the
-/// count can be calculated externally in real time.
-/// All data not necessary for the logic of the contract must be saved externally,
-/// and a reference is saved in this contract.
-/// Contract error messages are represented by specific codes: a first character `E`
-/// followed by a digit for the scope (users = 0, ballot = 1, vote = 2),
-/// and by two digits with a progressive id.
+/// counting can be calculated externally in real time.
+/// All data not necessary for the logic of the contract is saved externally,
+/// and a reference for each entity is saved in this contract.
 contract Elekton is Verifier {
 
     /// @dev Emitted when a user is created.
     /// @param _address: user address.
     /// @param _data: user data reference.
     event UserCreated (address _address, bytes32 _data);
-
+    
     /// @dev Emitted when the user data is updated.
     /// @param _address: user address.
     /// @param _data: new user data reference.
@@ -40,9 +37,9 @@ contract Elekton is Verifier {
     /// @param _decryptionKey: decryption key.
     event DecryptionKeyPublished (uint indexed _index, uint _decryptionKey);
 
-    // Ballot structure contains all the parameters needed to manage time, votes and voters.
+    // The ballot structure.
     struct Ballot {
-        bytes32 data; // External data reference.
+        bytes32 data; // External data reference (where there are name, description etc).
         address admin; // Address of the ballot creator.
         uint smtRoot; // Root of the census tree.
         uint startDate; // Ballot start timestamp.
@@ -58,7 +55,7 @@ contract Elekton is Verifier {
     Ballot[] public ballots;
 
     /// @dev Gets the vote nullifier and returns a bool.
-    /// Nullifier is a Poseidon hash of the ballot index and the voter private key.
+    /// The `uint` value is a Poseidon hash of the ballot index and the private key of the voter.
     /// This mapping is useful for preventing a voter from voting twice.
     mapping(uint => bool) public voteNullifier;
 
@@ -66,7 +63,8 @@ contract Elekton is Verifier {
     /// the user already exists, updates his old data reference.
     /// @param _data: user data reference.
     function createUser(bytes32 _data) external {
-        require(users[msg.sender] != _data, "E000"); // New user data must be different from the current data.
+        // The new data must be different from the old data.
+        require(users[msg.sender] != _data, "E000");
 
         uint currentData = uint(users[msg.sender]);
 
@@ -82,12 +80,12 @@ contract Elekton is Verifier {
     /// @dev Creates a ballot saving its data in the `ballots` mapping.
     /// @param _data: ballot data reference.
     /// @param _smtRoot: root of the census tree.
-    /// @param _startDate: ballot start timestamp.
-    /// @param _endDate: ballot end timestamp.
+    /// @param _startDate: start timestamp.
+    /// @param _endDate: end timestamp.
     function createBallot(bytes32 _data, uint _smtRoot, uint _startDate, uint _endDate) external {
-        require(users[msg.sender] != 0, "E100"); // User must exist.
-        require(_startDate >= block.timestamp, "E101"); // Start date cannot be in the past.
-        require(_startDate < _endDate, "E102"); // Start date must be after end date.
+        require(users[msg.sender] != 0, "E100"); // The user must exist.
+        require(_startDate >= block.timestamp, "E101"); // The start date cannot be in the past.
+        require(_startDate < _endDate, "E102"); // The start date must be after the end date.
 
         Ballot memory ballot;
 
@@ -102,7 +100,7 @@ contract Elekton is Verifier {
         emit BallotCreated(ballots.length - 1);
     }
 
-    /// @dev Adds a vote on the ballot, verifying the zk-snark proof that the user
+    /// @dev Adds a vote on the ballot, verifying the zk-snark proof that proves the user
     /// is enabled to vote without revealing the user's identity.
     /// @param _a: proof parameter.
     /// @param _b: proof parameter.
