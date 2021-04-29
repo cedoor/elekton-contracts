@@ -64,14 +64,14 @@ Install the binary distribution of [Besu](https://besu.hyperledger.org/en/stable
 
 Create the snark artifacts (it takes a few minutes) and start the Besu development network:
 
-```
+```bash
 yarn snark
 yarn start
 ```
 
 Test the contract functions and deploy a contract instance:
 
-```
+```bash
 yarn test
 yarn deploy # It print the contract address.
 ```
