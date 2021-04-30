@@ -1,4 +1,18 @@
 <p align="center">
+    <a href="https://github.com/cedoor/elekton-contracts" target="_blank">
+        elekton-contracts
+    </a>
+    | 
+    <a href="https://github.com/cedoor/elekton.js" target="_blank">
+        elekton.js
+    </a>
+    | 
+    <a href="https://github.com/cedoor/elekton-dapp" target="_blank">
+        elekton-dapp
+    </a>
+</p>
+
+<p align="center">
     <h1 align="center">
         Elekton contracts
     </h1>
@@ -6,6 +20,9 @@
 </p>
 
 <p align="center">
+    <a href="https://github.com/cedoor/elekton-contracts" target="_blank">
+        <img src="https://img.shields.io/badge/project-Elekton-blue.svg?style=flat-square">
+    </a>
     <a href="https://github.com/cedoor/elekton-contracts/blob/main/LICENSE" target="_blank">
         <img src="https://img.shields.io/github/license/cedoor/elekton-contracts.svg?style=flat-square">
     </a>
@@ -41,7 +58,7 @@ Elekton is a set of modules useful to create a simple e-voting system that uses 
 
 In order to create anonymous transactions it is necessary to use an universal shared Ethereum account to sign them, and in order to have more scalability it is necessary to use a PoA consensus mechanism. For this reason the best solution is to use a permissioned blockchain with a free-gas network. Elekton uses [Besu](https://besu.hyperledger.org/en/stable/), an Ethereum client written in Java that implements Proof of Work (Ethash) and Proof of Authority (IBFT 2.0 and Clique) consensus mechanisms.
 
-The goal of zero-knowledge proofs is for a *verifier* to be able to convince herself that a *prover* possesses knowledge of a secret parameter. In the Elekton system the verifier is a Solidity smart contract, whereas the prover is the voter, who must create a valid off-chain proof in order to send a transaction and vote on an on-chain ballot anonymously. In recent years [zk-SNARK](https://doi.org/10.1145/2090236.2090263) has aroused a lot of interest. ZCash uses it to provide a privacy-focused cryptocurrency with a strong mechanism for creating anonymous transactions and many development tools make it easy to use for the integration with other types of blockchains as well. [Iden3](https://www.iden3.io/) provides for example several tools to use zk-SNARK with Ethereum, and they are just used in the Elekton system. [Circom](https://github.com/iden3/circom) is used to create the voting [circuit](https://github.com/cedoor/elekton-contracts/blob/main/circuit/scheme.png), whereas [SnarkJS](https://github.com/iden3/snarkjs) is used to generate the proofs and export the verifier as a Solidity smart contract. The circuit requires the use of some ZK-friendly algorithms: [Merkle trees](https://doi.org/10.1007/3-540-48184-2_32), [EdDSA](https://doi.org/10.17487/RFC8032) and [Poseidon](https://www.poseidon-hash.info/). Circom actually requires a special kind of Merkle tree, the sparse Merkle tree (SMT), which can be used to create not only membership proofs, but also non-membership proofs. Elekton uses the [SMT](https://github.com/cedoor/sparse-merkle-tree) TypeScript implementation and the [Circomlib](https://github.com/iden3/circomlib) JavaScript library, which provides several zk-friendly algorithm implementations.
+The goal of zero-knowledge proofs is for a *verifier* to be able to convince herself that a *prover* possesses knowledge of a secret parameter. In the Elekton system the verifier is a Solidity smart contract, whereas the prover is the voter, who must create a valid off-chain proof in order to send a transaction and vote on an on-chain ballot anonymously. In recent years [zk-SNARK](https://doi.org/10.1145/2090236.2090263) has aroused a lot of interest. ZCash uses it to provide a privacy-focused cryptocurrency with a strong mechanism for creating anonymous transactions and many development tools make it easy to use for the integration with other types of blockchains as well. [Iden3](https://www.iden3.io/) provides several tools to use zk-SNARK with Ethereum, and they are just used in the Elekton system. [Circom](https://github.com/iden3/circom) is used to create the voting [circuit](https://github.com/cedoor/elekton-contracts/blob/main/circuit/scheme.png), whereas [SnarkJS](https://github.com/iden3/snarkjs) is used to generate the proofs and export the verifier as a Solidity smart contract. The circuit requires the use of some ZK-friendly algorithms: [Merkle trees](https://doi.org/10.1007/3-540-48184-2_32), [EdDSA](https://doi.org/10.17487/RFC8032) and [Poseidon](https://www.poseidon-hash.info/). Circom actually requires a special kind of Merkle tree, the sparse Merkle tree (SMT), which can be used to create not only membership proofs, but also non-membership proofs. Elekton uses the [SMT](https://github.com/cedoor/sparse-merkle-tree) TypeScript implementation and the [Circomlib](https://github.com/iden3/circomlib) JavaScript library, which provides several zk-friendly algorithm implementations.
 
 ## Features
 
