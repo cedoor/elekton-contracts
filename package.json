@@ -1,7 +1,7 @@
 {
     "name": "elekton-contracts",
     "version": "0.1.0",
-    "description": "Elekton Solidity smart contracts.",
+    "description": "Solidity smart contracts to vote anonymously on a free-gas network (Besu) using zk-SNARK.",
     "keywords": [
         "typescript",
         "ethereum",
