@@ -100,12 +100,12 @@ contract Elekton is Verifier {
         emit BallotCreated(ballots.length - 1);
     }
 
-    /// @dev Adds a vote on the ballot, verifying the zk-snark proof that proves the user
-    /// is enabled to vote without revealing the user's identity.
+    /// @dev Adds a vote on a ballot, verifying the zk-snark proof that proves the user
+    /// is enabled to vote without revealing his identity.
     /// @param _a: proof parameter.
     /// @param _b: proof parameter.
     /// @param _c: proof parameter.
-    /// @param _input: array of public proof parameters, in order: smtRoot, vote, ballotId, voteNullifier.
+    /// @param _input: array of public proof parameters, in order: smtRoot, vote, ballotIndex, voteNullifier.
     function vote(uint[2] calldata _a, uint[2][2] calldata _b, uint[2] calldata _c, uint[4] calldata _input) external {
         require(_input[2] < ballots.length, "E200"); // Ballot index is wrong.
         require(block.timestamp > ballots[_input[2]].startDate, "E201"); // Invalid vote in advance.
